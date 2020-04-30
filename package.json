@@ -10,8 +10,13 @@
     },
     "license": "GNU LGPLv3",
     "devDependencies": {
+        "@types/socket.io": "^2.1.4",
+        "socket-chat-protocol": "git+https://git.bre4k3r.de/dev-bre4k3r/socket-chat/socket-chat-protocol.git",
         "tslint": "^6.1.2",
         "tslint-config-prettier": "^1.18.0",
         "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "socket.io": "^2.3.0"
     }
 }
