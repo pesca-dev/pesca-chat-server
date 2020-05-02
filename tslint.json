@@ -1,11 +1,6 @@
 {
     "extends": ["tslint:recommended", "tslint-config-prettier"],
     "rules": {
-        "no-legacy-imports": true,
-        "no-import-outside-of-core": true,
-        "no-import-from-other-modules": true,
-        "no-negate-await-result": true,
-
         "adjacent-overload-signatures": true,
         "align": [false, "statements"],
         "array-type": [true, "array"],
@@ -77,6 +72,7 @@
         "one-line": [true, "check-catch", "check-else", "check-finally", "check-open-brace", "check-whitespace"],
         "object-literal-sort-keys": [false],
         "one-variable-per-declaration": [true, "ignore-for-loop"],
+        "only-arrow-functions": false,
         "ordered-imports": [
             true,
             {
