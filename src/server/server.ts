@@ -1,7 +1,7 @@
 import $ from "logsen";
 import socketio from "socket.io";
-import { ChannelManager } from "./channelManager";
-import { SocketManager } from "./socketManager";
+import { ChannelManager } from "../channel/channelManager";
+import { SocketManager } from "../sockets/socketManager";
 
 /**
  * Class for serving as a Server.

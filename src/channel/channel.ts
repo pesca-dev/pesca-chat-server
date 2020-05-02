@@ -2,9 +2,9 @@ import { EventEmitter } from "events";
 import $ from "logsen";
 import { Client, Server } from "socket-chat-protocol";
 import { Socket } from "socket.io";
-import { MethodFactory } from "./methodfactory";
-import { SocketManager } from "./socketManager";
-import { SocketMap } from "./socketMap";
+import { MethodFactory } from "../sockets/methodfactory";
+import { SocketManager } from "../sockets/socketManager";
+import { SocketMap } from "../sockets/socketMap";
 
 /**
  * Class for representing a Chat-Channel.

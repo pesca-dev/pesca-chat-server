@@ -1,6 +1,6 @@
-import { ChannelAlreadyExistsException } from "./../error/channelAlreadyExistsException";
+import { ChannelAlreadyExistsException } from "../error/channelAlreadyExistsException";
+import { SocketManager } from "../sockets/socketManager";
 import { Channel } from "./channel";
-import { SocketManager } from "./socketManager";
 
 /**
  * Class for managing all channels.

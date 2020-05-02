@@ -1,6 +1,6 @@
 import { Server, Client, SocketEventManager } from "socket-chat-protocol";
 import { Socket } from "socket.io";
-import { ChannelManager } from "./channelManager";
+import { ChannelManager } from "../channel/channelManager";
 import { MethodFactory } from "./methodfactory";
 
 /**

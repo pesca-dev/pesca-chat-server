@@ -1,7 +1,7 @@
 import $ from "logsen";
 import { Server, Client } from "socket-chat-protocol";
 import { Socket } from "socket.io";
-import { Channel } from "./channel";
+import { Channel } from "../channel/channel";
 import { SocketManager } from "./socketManager";
 
 /**
