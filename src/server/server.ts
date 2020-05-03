@@ -1,6 +1,7 @@
 import $ from "logsen";
 import socketio from "socket.io";
 import { ChannelManager } from "../channel/channelManager";
+import { setupUserObject } from "../middleware/userSetupMiddleware";
 import { SocketManager } from "../sockets/socketManager";
 
 /**
@@ -18,6 +19,7 @@ export default class Server {
      */
     constructor() {
         this.io = socketio();
+        this.io.use(setupUserObject);
         this.channelManager = new ChannelManager();
         this.socketManager = new SocketManager();
 

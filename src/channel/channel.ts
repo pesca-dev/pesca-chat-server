@@ -44,7 +44,7 @@ export class Channel extends EventEmitter {
      * @param socket socket to join this channel
      */
     public join(socket: Socket): void {
-        $.log(`Socket [${socket.id}] joined channel "${this.name}"`);
+        $.log(`Socket [${socket.id}] {User-ID: ${socket.user.id}} joined channel "${this.name}"`);
         if (this.sockets.has(socket.id)) {
             throw new Error("Socket already joined this channel!");
         }
