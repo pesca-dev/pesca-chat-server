@@ -1,3 +1,4 @@
+import $ from "logsen";
 import { Client } from "socket-chat-protocol";
 import { Socket } from "socket.io";
 import { SocketManager } from "../sockets/socketManager";
@@ -8,7 +9,7 @@ import { Channel } from "./channel";
  */
 export class ChannelManager {
     private socketManager!: SocketManager;
-    private channel!: Map<string, Channel>;
+    private channels!: Map<string, Channel>;
 
     /**
      * Start the channel-manager and hand it the current instance of SocketManager.
@@ -16,34 +17,66 @@ export class ChannelManager {
      */
     public start(socketManager: SocketManager): void {
         this.socketManager = socketManager;
-        this.channel = new Map<string, Channel>();
+        this.channels = new Map<string, Channel>();
     }
 
     /**
      * Create a new channel with a given name.
      * @param name name of the channel to create
-     * @throws ChannelAlreadyExistsException if channel already exists
+     * @param pasword password for the channel, may be undefined, so channel has no password
+     * @param socket socket, who created this channel. Owner-ID will be taken from it
      */
-    public addChannel(name: string, _socket?: Socket): void {
-        // if (socket) {
-        //     if(this.channel.has(name)) {
-        //         this.socketManager.emit(socket, "")
-        //     } else {
-        this.channel.set(name, new Channel(name, this.socketManager));
-        // }
+    public createChannel(name: string, password: string | undefined, socket?: Socket): void {
+        if (this.channels.has(name)) {
+            if (socket) {
+                this.socketManager.emit(socket, "channel/create-response", [
+                    {
+                        action: "create",
+                        channel: name,
+                        success: false,
+                        reason: "Channel already exists!"
+                    }
+                ]);
+            }
+            $.err(`Channel '${name}' already exists.`);
+            return;
+        }
+
+        const ownerID = socket?.user.id ?? "-1";
+
+        this.channels.set(name, new Channel(name, this.socketManager, ownerID, password));
+        $.info(`Channel '${name}' successfully created. Owner ID = ${ownerID}.`);
+        if (socket) {
+            this.socketManager.emit(socket, "channel/create-response", [
+                {
+                    action: "create",
+                    channel: name,
+                    success: true
+                }
+            ]);
+        }
     }
 
     /**
      * Delete the channel with the given name, if it exists.
      * @param name name of the channel to delete
      */
-    public deleteChannel(name: string): void {
-        const channel = this.channel.get(name);
+    public deleteChannel(name: string, socket: Socket): void {
+        const channel = this.channels.get(name);
         if (!channel) {
+            this.socketManager.emit(socket, "channel/delete-response", [
+                {
+                    action: "delete",
+                    channel: name,
+                    success: false,
+                    reason: `Channel '${name}' does not exist`
+                }
+            ]);
             return;
         }
-        channel.delete();
-        this.channel.delete(name);
+        if (channel.delete(socket)) {
+            this.channels.delete(name);
+        }
     }
 
     /**
@@ -52,7 +85,7 @@ export class ChannelManager {
      * Does not throw any exception if anything goes wrong.
      */
     public joinChannel(socket: Socket, request: Client.ChannelActionRequest<"join">): void {
-        this.channel.get(request.channel)?.join(socket, request);
+        this.channels.get(request.channel)?.join(socket, request);
     }
 
     /**
@@ -61,7 +94,7 @@ export class ChannelManager {
      * Does not throw any exception if anything goes wrong.
      */
     public leaveChannel(socket: Socket, request: Client.ChannelActionRequest<"leave">): void {
-        this.channel.get(request.channel)?.leave(socket, request);
+        this.channels.get(request.channel)?.leave(socket, request);
     }
 
     /**
@@ -69,6 +102,6 @@ export class ChannelManager {
      * @param name name of the channel to get
      */
     public getChannel(name: string): Channel | undefined {
-        return this.channel.get(name);
+        return this.channels.get(name);
     }
 }

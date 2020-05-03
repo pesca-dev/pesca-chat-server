@@ -7,7 +7,8 @@ declare namespace SocketIO {
     }
 
     interface UserObject {
-        id: string;
+        id?: string;
+        username?: string;
     }
 
     type NextFunction = (err?: any) => void;

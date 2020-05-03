@@ -15,6 +15,7 @@ export class MethodFactory {
      * @param event event name
      * @param ctx execution context
      */
+    // tslint:disable-next-line: cyclomatic-complexity
     public static createMethod<K extends keyof Server.Event>(
         socket: Socket,
         event: K,
@@ -22,25 +23,41 @@ export class MethodFactory {
     ): (data: Server.Event[K]) => void {
         switch (event) {
             case "disconnect":
+                /**
+                 * Handle disconnects.
+                 */
                 return function(_reason: Server.Event[K]): void {
                     // Leave the channel, when you disconnect
                     (ctx as Channel).leave(socket);
                 };
 
             case "error":
+                /**
+                 * Handle errors.
+                 */
                 return function(reason: Server.Event[K]): void {
-                    $.log(reason);
+                    $.err(reason);
                 };
 
             case "channel/send-message":
+                /**
+                 * Handle a received array of messages
+                 */
                 return function(msgs: Server.Event[K]): void {
+                    if (!(msgs instanceof Array)) {
+                        // TODO: Add bad requests error messa
+                        return;
+                    }
                     const messages: Server.TextMessage[] = (msgs as Client.TextMessage[]).map(m => {
+                        // Create the correct message-object
                         return {
                             ...m,
+                            author: socket.user.username ?? "Unknown User",
                             id: `${Math.floor(Math.random() * 1000000)}`,
                             timestamp: `${Date.now()}`
                         };
                     });
+                    // Process all messages individually
                     messages.forEach(async m => {
                         const channel = (ctx as SocketManager).channelManager.getChannel(m.channel);
                         // Check, if the channel exists and the socket is in this channel
@@ -51,9 +68,18 @@ export class MethodFactory {
                 };
 
             case "channel/join-request":
+                /**
+                 * Handle a join request to a channel by a socket.
+                 */
                 return async function(requests: Server.Event[K]): Promise<void> {
+                    if (!(requests instanceof Array)) {
+                        // TODO: Add bad requests error messa
+                        return;
+                    }
+                    const s = ctx as SocketManager;
+                    // Process all requests individually
                     (requests as Client.ChannelActionRequest<"join">[]).forEach(async r => {
-                        const s = ctx as SocketManager;
+                        // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
                             channel.join(socket, r);
@@ -71,9 +97,18 @@ export class MethodFactory {
                 };
 
             case "channel/leave-request":
+                /**
+                 * Handle a leave request from a channel by a socket.
+                 */
                 return async function(requests: Server.Event[K]): Promise<void> {
+                    if (!(requests instanceof Array)) {
+                        // TODO: Add bad requests error messa
+                        return;
+                    }
+                    const s = ctx as SocketManager;
+                    // Process all requests individually
                     (requests as Client.ChannelActionRequest<"leave">[]).forEach(async r => {
-                        const s = ctx as SocketManager;
+                        // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
                             channel.leave(socket, r);
@@ -89,7 +124,91 @@ export class MethodFactory {
                         }
                     });
                 };
+
+            case "channel/create-request":
+                /**
+                 * Handle a create request of a channel by a socket.
+                 */
+                return async function(data: Server.Event[K]): Promise<void> {
+                    const s = ctx as SocketManager;
+                    const requests = data as Client.ChannelActionRequest<"create">[];
+                    if (!(requests instanceof Array)) {
+                        // TODO: Add bad requests error messa
+                        return;
+                    }
+                    // Process all requests individually
+                    requests.forEach(async r => {
+                        // Only create channel, if there is a valid channelname
+                        if (!r.channel) {
+                            s.emit(socket, "channel/create-response", [
+                                {
+                                    action: "create",
+                                    channel: "",
+                                    success: false,
+                                    reason: "No valid channelname provided!"
+                                }
+                            ]);
+                            return;
+                        }
+                        // Create a new channel
+                        s.channelManager.createChannel(r.channel, r.password, socket);
+                    });
+                };
+
+            case "channel/delete-request":
+                return async function(data: Server.Event[K]): Promise<void> {
+                    if (!(data instanceof Array)) {
+                        return;
+                    }
+                    const s = ctx as SocketManager;
+                    const requests = data as Client.ChannelActionRequest<"delete">[];
+
+                    // Process all requests individually
+                    requests.forEach(async r => {
+                        if (!r.channel) {
+                            s.emit(socket, "channel/delete-response", [
+                                {
+                                    action: "delete",
+                                    channel: "",
+                                    success: false,
+                                    reason: "No valid channelname provided!"
+                                }
+                            ]);
+                            return;
+                        }
+                        s.channelManager.deleteChannel(r.channel, socket);
+                    });
+                };
+
+            case "server/login-request":
+                /**
+                 * Handle a login request to the server by a socket.
+                 */
+                return async function(requests: Server.Event[K]): Promise<void> {
+                    if (!(requests instanceof Array)) {
+                        // TODO: Add bad requests error messa
+                        return;
+                    }
+                    const s = ctx as SocketManager;
+                    // Fetch the login request and if it is not valid, notify the client
+                    const request: Client.LoginRequest = (requests as Client.LoginRequest[])[0];
+                    if (!request) {
+                        s.emit(socket, "server/login-response", [
+                            {
+                                username: "",
+                                success: false,
+                                id: ""
+                            }
+                        ]);
+                    } else {
+                        s.authenticationManager.login(socket, request);
+                    }
+                };
+
             default:
+                /**
+                 * Default fallback. Never really needed. Maybe add some useless stuff here.
+                 */
                 return function(_data: Server.Event[K]): void {
                     //
                 };

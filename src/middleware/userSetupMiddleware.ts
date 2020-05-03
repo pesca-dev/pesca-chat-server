@@ -1,4 +1,3 @@
-import $ from "logsen";
 import { Socket, NextFunction } from "socket.io";
 
 /**
@@ -7,9 +6,6 @@ import { Socket, NextFunction } from "socket.io";
  * @param next nextfunction to call
  */
 export function setupUserObject(socket: Socket, next: NextFunction): void {
-    $.log("Setting up user object");
-    socket.user = {
-        id: "-1"
-    };
+    socket.user = {};
     next();
 }

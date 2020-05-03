@@ -12,6 +12,7 @@ import { SocketMap } from "../sockets/socketMap";
 export class Channel extends EventEmitter {
     private _name: string;
     private password: string | undefined;
+    private owner: string;
 
     private socketManager: SocketManager;
 
@@ -25,9 +26,10 @@ export class Channel extends EventEmitter {
      * @param name name of the channel
      * @param socketManager current instance of a SocketManager for firing events on sockets.
      */
-    constructor(name: string, socketManager: SocketManager, password?: string) {
+    constructor(name: string, socketManager: SocketManager, owner: string, password?: string) {
         super();
         this._name = name;
+        this.owner = owner;
         this.password = password;
         this.socketManager = socketManager;
         this.sockets = new SocketMap(this.socketManager);
@@ -52,7 +54,7 @@ export class Channel extends EventEmitter {
         }
 
         // If password is incorrect, send failure-response to the client
-        if (this.password && request.passwort !== this.password) {
+        if (this.password && request.password !== this.password) {
             this.socketManager.emit(socket, "channel/join-response", [
                 {
                     action: request.action,
@@ -114,7 +116,7 @@ export class Channel extends EventEmitter {
                     {
                         action: "leave",
                         channel: request.channel,
-                        success: false,
+                        success: true,
                         reason: "You are no member of this channel!"
                     }
                 ]);
@@ -165,10 +167,31 @@ export class Channel extends EventEmitter {
     /**
      * Delete this channel and disconnect all connected sockets in it.
      */
-    public delete(): void {
+    public delete(socket: Socket): boolean {
+        if (!socket.user.id || socket.user.id !== this.owner) {
+            this.socketManager.emit(socket, "channel/delete-response", [
+                {
+                    action: "delete",
+                    channel: this.name,
+                    success: false,
+                    reason: "You are not the owner of this channel!"
+                }
+            ]);
+            return false;
+        }
         this.sockets.forEach(async socket => {
-            socket.disconnect(true);
+            // TODO: Add event to client, which handles serverside channel closing
+            this.leave(socket);
+            // socket.disconnect(true);
         });
+        this.socketManager.emit(socket, "channel/delete-response", [
+            {
+                action: "delete",
+                channel: this.name,
+                success: true
+            }
+        ]);
+        return true;
     }
 
     /**

@@ -1,5 +1,6 @@
 import { Server, Client, SocketEventManager } from "socket-chat-protocol";
 import { Socket } from "socket.io";
+import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
 import { MethodFactory } from "./methodfactory";
 
@@ -8,20 +9,26 @@ import { MethodFactory } from "./methodfactory";
  */
 export class SocketManager implements SocketEventManager<Server.Event, Client.Event> {
     private _channelManager!: ChannelManager;
+    private _authenticationManager!: AuthenticationManager;
 
     /**
      * Start the SocketManger and hand it the current instance of ChannelManager.
      * @param channelManager current instance of the ChannelManager
      */
-    public start(channelManager: ChannelManager): void {
+    public start(channelManager: ChannelManager, authenticationManager: AuthenticationManager): void {
         this._channelManager = channelManager;
+        this._authenticationManager = authenticationManager;
+    }
+
+    public addBasicEventsToSocket(socket: Socket): void {
+        this.register(socket, "server/login-request", MethodFactory.createMethod(socket, "server/login-request", this));
     }
 
     /**
      * Add a new socket and register all events on it.
      * @param socket socket to add
      */
-    public addSocket(socket: Socket): void {
+    public addExtendedEventsToSocket(socket: Socket): void {
         this.channelManager.joinChannel(socket, {
             action: "join",
             channel: "default"
@@ -32,6 +39,16 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
             socket,
             "channel/leave-request",
             MethodFactory.createMethod(socket, "channel/leave-request", this)
+        );
+        this.register(
+            socket,
+            "channel/create-request",
+            MethodFactory.createMethod(socket, "channel/create-request", this)
+        );
+        this.register(
+            socket,
+            "channel/delete-request",
+            MethodFactory.createMethod(socket, "channel/delete-request", this)
         );
     }
 
@@ -60,5 +77,9 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
      */
     public get channelManager(): ChannelManager {
         return this._channelManager;
+    }
+
+    public get authenticationManager(): AuthenticationManager {
+        return this._authenticationManager;
     }
 }
