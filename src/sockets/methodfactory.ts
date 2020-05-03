@@ -23,6 +23,7 @@ export class MethodFactory {
         switch (event) {
             case "disconnect":
                 return function(_reason: Server.Event[K]): void {
+                    // Leave the channel, when you disconnect
                     (ctx as Channel).leave(socket);
                 };
 

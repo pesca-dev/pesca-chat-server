@@ -100,8 +100,8 @@ export class Channel extends EventEmitter {
      * Delete this channel and disconnect all connected sockets in it.
      */
     public delete(): void {
-        this.sockets.forEach(socket => {
-            socket.disconnect();
+        this.sockets.forEach(async socket => {
+            socket.disconnect(true);
         });
     }
 
