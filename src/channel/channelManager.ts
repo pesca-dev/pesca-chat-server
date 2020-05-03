@@ -1,3 +1,4 @@
+import { Client } from "socket-chat-protocol";
 import { Socket } from "socket.io";
 import { SocketManager } from "../sockets/socketManager";
 import { Channel } from "./channel";
@@ -43,6 +44,24 @@ export class ChannelManager {
         }
         channel.delete();
         this.channel.delete(name);
+    }
+
+    /**
+     * Shortform for `ChannelManager.getChannel(request.channel).join(socket, request)`.
+     *
+     * Does not throw any exception if anything goes wrong.
+     */
+    public joinChannel(socket: Socket, request: Client.ChannelActionRequest<"join">): void {
+        this.channel.get(request.channel)?.join(socket, request);
+    }
+
+    /**
+     * Shortform for `ChannelManager.getChannel(request.channel).leave(socket, request)`.
+     *
+     * Does not throw any exception if anything goes wrong.
+     */
+    public leaveChannel(socket: Socket, request: Client.ChannelActionRequest<"leave">): void {
+        this.channel.get(request.channel)?.leave(socket, request);
     }
 
     /**
