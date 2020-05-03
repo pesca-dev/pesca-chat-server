@@ -70,7 +70,7 @@ export class Channel extends EventEmitter {
                 {
                     action: request.action,
                     channel: request.channel,
-                    success: false,
+                    success: true,
                     reason: "Socket already joined this channel"
                 }
             ]);
