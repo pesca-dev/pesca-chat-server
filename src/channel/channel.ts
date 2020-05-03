@@ -11,6 +11,7 @@ import { SocketMap } from "../sockets/socketMap";
  */
 export class Channel extends EventEmitter {
     private _name: string;
+    private password: string | undefined;
 
     private socketManager: SocketManager;
 
@@ -24,9 +25,10 @@ export class Channel extends EventEmitter {
      * @param name name of the channel
      * @param socketManager current instance of a SocketManager for firing events on sockets.
      */
-    constructor(name: string, socketManager: SocketManager) {
+    constructor(name: string, socketManager: SocketManager, password?: string) {
         super();
         this._name = name;
+        this.password = password;
         this.socketManager = socketManager;
         this.sockets = new SocketMap(this.socketManager);
         this.bind();
@@ -43,14 +45,41 @@ export class Channel extends EventEmitter {
      * Let a socket join this channel.
      * @param socket socket to join this channel
      */
-    public join(socket: Socket): void {
-        $.log(`Socket [${socket.id}] {User-ID: ${socket.user.id}} joined channel "${this.name}"`);
-        if (this.sockets.has(socket.id)) {
-            throw new Error("Socket already joined this channel!");
+    public join(socket: Socket, request: Client.ChannelActionRequest<"join">): void {
+        if (this.password && request.passwort !== this.password) {
+            this.socketManager.emit(socket, "channel/join-response", [
+                {
+                    action: request.action,
+                    channel: request.channel,
+                    success: false,
+                    reason: "Invalid password provided"
+                }
+            ]);
+            return $.err("Invalid password provided!");
         }
+        if (this.sockets.has(socket.id)) {
+            this.socketManager.emit(socket, "channel/join-response", [
+                {
+                    action: request.action,
+                    channel: request.channel,
+                    success: false,
+                    reason: "Socket already joined this channel"
+                }
+            ]);
+            return $.err("Socket already joined this channel!");
+        }
+
+        $.log(`Socket [${socket.id}] {User-ID: ${socket.user.id}} joined channel "${this.name}"`);
         // Upon disconnecting, leave this channel
         this.socketManager.register(socket, "disconnect", MethodFactory.createMethod(socket, "disconnect", this));
         this.sockets.set(socket.id, socket);
+        this.socketManager.emit(socket, "channel/join-response", [
+            {
+                action: request.action,
+                channel: request.channel,
+                success: true
+            }
+        ]);
     }
 
     /**
