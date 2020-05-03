@@ -1,7 +1,7 @@
 {
-    "name": "typescript-template",
+    "name": "socket-chat-server",
     "version": "1.0.0",
-    "description": "A simple TypeScript template.",
+    "description": "The server component of the socket chat app.",
     "main": "build/index.js",
     "scripts": {
         "start": "node .",
