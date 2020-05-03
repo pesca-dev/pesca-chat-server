@@ -56,3 +56,13 @@ $ npm run start # this starts the server
 ```
 
 After this, you can see all the needed information in the console.
+
+## Commands
+
+```sh
+$ npm run build # rebuild the JavaScript files
+
+$ npm run start / node . # start the server
+
+$ npm run build:start # rebuild the JS files and start the server
+```
