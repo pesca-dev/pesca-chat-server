@@ -1,4 +1,4 @@
-import { ChannelAlreadyExistsException } from "../error/channelAlreadyExistsException";
+import { Socket } from "socket.io";
 import { SocketManager } from "../sockets/socketManager";
 import { Channel } from "./channel";
 
@@ -23,11 +23,13 @@ export class ChannelManager {
      * @param name name of the channel to create
      * @throws ChannelAlreadyExistsException if channel already exists
      */
-    public addChannel(name: string): void {
-        if (this.channel.has(name)) {
-            throw new ChannelAlreadyExistsException("Channel already exists!");
-        }
+    public addChannel(name: string, _socket?: Socket): void {
+        // if (socket) {
+        //     if(this.channel.has(name)) {
+        //         this.socketManager.emit(socket, "")
+        //     } else {
         this.channel.set(name, new Channel(name, this.socketManager));
+        // }
     }
 
     /**

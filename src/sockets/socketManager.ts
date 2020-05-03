@@ -22,11 +22,17 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
      * @param socket socket to add
      */
     public addSocket(socket: Socket): void {
-        this.channelManager.getChannel("default")?.join(socket, {
+        /* this.channelManager.getChannel("default")?.join(socket, {
             action: "join",
             channel: "default"
-        });
+        }); */
         this.register(socket, "channel/send-message", MethodFactory.createMethod(socket, "channel/send-message", this));
+        this.register(socket, "channel/join-request", MethodFactory.createMethod(socket, "channel/join-request", this));
+        this.register(
+            socket,
+            "channel/leave-request",
+            MethodFactory.createMethod(socket, "channel/leave-request", this)
+        );
     }
 
     /**

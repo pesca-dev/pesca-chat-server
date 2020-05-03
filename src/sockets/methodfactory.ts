@@ -50,6 +50,45 @@ export class MethodFactory {
                     });
                 };
 
+            case "channel/join-request":
+                return async function(requests: Server.Event[K]): Promise<void> {
+                    (requests as Client.ChannelActionRequest<"join">[]).forEach(async r => {
+                        const s = ctx as SocketManager;
+                        const channel = s.channelManager.getChannel(r.channel);
+                        if (channel) {
+                            channel.join(socket, r);
+                        } else {
+                            s.emit(socket, "channel/join-response", [
+                                {
+                                    action: "join",
+                                    channel: r.channel,
+                                    success: false,
+                                    reason: `Channel '${r.channel}' does not exist`
+                                }
+                            ]);
+                        }
+                    });
+                };
+
+            case "channel/leave-request":
+                return async function(requests: Server.Event[K]): Promise<void> {
+                    (requests as Client.ChannelActionRequest<"leave">[]).forEach(async r => {
+                        const s = ctx as SocketManager;
+                        const channel = s.channelManager.getChannel(r.channel);
+                        if (channel) {
+                            channel.leave(socket, r);
+                        } else {
+                            s.emit(socket, "channel/leave-response", [
+                                {
+                                    channel: "leave",
+                                    action: r.action,
+                                    success: false,
+                                    reason: `Channel '${r.channel}' does not exist`
+                                }
+                            ]);
+                        }
+                    });
+                };
             default:
                 return function(_data: Server.Event[K]): void {
                     //

@@ -46,6 +46,12 @@ export class Channel extends EventEmitter {
      * @param socket socket to join this channel
      */
     public join(socket: Socket, request: Client.ChannelActionRequest<"join">): void {
+        // If names are not the same do nothing
+        if (this.name !== request.channel) {
+            return;
+        }
+
+        // If password is incorrect, send failure-response to the client
         if (this.password && request.passwort !== this.password) {
             this.socketManager.emit(socket, "channel/join-response", [
                 {
@@ -57,6 +63,8 @@ export class Channel extends EventEmitter {
             ]);
             return $.err("Invalid password provided!");
         }
+
+        // If socket is already in this channel, send failure-response to the client
         if (this.sockets.has(socket.id)) {
             this.socketManager.emit(socket, "channel/join-response", [
                 {
@@ -94,9 +102,38 @@ export class Channel extends EventEmitter {
      * Let a socket leave this channel.
      * @param socket socket to leave this channel
      */
-    public leave(socket: Socket): void {
-        $.log(`Socket [${socket.id}] left channel "${this.name}"`);
+    public leave(socket: Socket, request?: Client.ChannelActionRequest<"leave">): void {
+        // If the name of the requested channel is wrong or the socket is not in this channel anymore, do nothing
+        if (request && request.channel !== this.name) {
+            return;
+        }
+
+        if (!this.sockets.has(socket.id)) {
+            if (request) {
+                this.socketManager.emit(socket, "channel/leave-response", [
+                    {
+                        action: "leave",
+                        channel: request.channel,
+                        success: false,
+                        reason: "You are no member of this channel!"
+                    }
+                ]);
+            }
+            return;
+        }
         this.sockets.delete(socket.id);
+        $.log(`Socket [${socket.id}] left channel "${this.name}"`);
+
+        // If the leaving was issue via request, send a valid response
+        if (request) {
+            this.socketManager.emit(socket, "channel/leave-response", [
+                {
+                    action: "leave",
+                    channel: request.channel,
+                    success: true
+                }
+            ]);
+        }
     }
 
     /**
