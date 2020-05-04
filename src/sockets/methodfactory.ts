@@ -101,6 +101,7 @@ export class MethodFactory {
                  * Handle a leave request from a channel by a socket.
                  */
                 return async function(requests: Server.Event[K]): Promise<void> {
+                    // TODO: use `Array.isArray`
                     if (!(requests instanceof Array)) {
                         // TODO: Add bad requests error messa
                         return;
