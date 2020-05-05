@@ -66,7 +66,7 @@ export class Channel extends EventEmitter {
             return $.err("Invalid password provided!");
         }
 
-        // If socket is already in this channel, send failure-response to the client
+        // If socket is already in this channel, send success-response to the client
         if (this.sockets.has(socket.id)) {
             this.socketManager.emit(socket, "channel/join-response", [
                 {
@@ -180,9 +180,13 @@ export class Channel extends EventEmitter {
             return false;
         }
         this.sockets.forEach(async socket => {
-            // TODO: Add event to client, which handles serverside channel closing
+            this.socketManager.emit(socket, "channel/closed", [
+                {
+                    channel: this.name,
+                    message: "The channel got closed and due to that, you got kicked out of it."
+                }
+            ]);
             this.leave(socket);
-            // socket.disconnect(true);
         });
         this.socketManager.emit(socket, "channel/delete-response", [
             {
