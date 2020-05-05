@@ -44,8 +44,16 @@ export class MethodFactory {
                  * Handle a received array of messages
                  */
                 return function(msgs: Server.Event[K]): void {
-                    if (!(msgs instanceof Array)) {
-                        // TODO: Add bad requests error messa
+                    const s = ctx as SocketManager;
+                    if (!Array.isArray(msgs)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
                         return;
                     }
                     const messages: Server.TextMessage[] = (msgs as Client.TextMessage[]).map(m => {
@@ -59,7 +67,7 @@ export class MethodFactory {
                     });
                     // Process all messages individually
                     messages.forEach(async m => {
-                        const channel = (ctx as SocketManager).channelManager.getChannel(m.channel);
+                        const channel = s.channelManager.getChannel(m.channel);
                         // Check, if the channel exists and the socket is in this channel
                         if (channel && channel.contains(socket)) {
                             channel.fire("channel/send-message", [m]);
@@ -72,11 +80,18 @@ export class MethodFactory {
                  * Handle a join request to a channel by a socket.
                  */
                 return async function(requests: Server.Event[K]): Promise<void> {
-                    if (!(requests instanceof Array)) {
-                        // TODO: Add bad requests error messa
+                    const s = ctx as SocketManager;
+                    if (!Array.isArray(requests)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
                         return;
                     }
-                    const s = ctx as SocketManager;
                     // Process all requests individually
                     (requests as Client.ChannelActionRequest<"join">[]).forEach(async r => {
                         // Fetch the channel and check, if it exists
@@ -101,12 +116,18 @@ export class MethodFactory {
                  * Handle a leave request from a channel by a socket.
                  */
                 return async function(requests: Server.Event[K]): Promise<void> {
-                    // TODO: use `Array.isArray`
-                    if (!(requests instanceof Array)) {
-                        // TODO: Add bad requests error messa
+                    const s = ctx as SocketManager;
+                    if (!Array.isArray(requests)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
                         return;
                     }
-                    const s = ctx as SocketManager;
                     // Process all requests individually
                     (requests as Client.ChannelActionRequest<"leave">[]).forEach(async r => {
                         // Fetch the channel and check, if it exists
@@ -133,8 +154,15 @@ export class MethodFactory {
                 return async function(data: Server.Event[K]): Promise<void> {
                     const s = ctx as SocketManager;
                     const requests = data as Client.ChannelActionRequest<"create">[];
-                    if (!(requests instanceof Array)) {
-                        // TODO: Add bad requests error messa
+                    if (!Array.isArray(requests)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
                         return;
                     }
                     // Process all requests individually
@@ -158,11 +186,19 @@ export class MethodFactory {
 
             case "channel/delete-request":
                 return async function(data: Server.Event[K]): Promise<void> {
-                    if (!(data instanceof Array)) {
-                        return;
-                    }
                     const s = ctx as SocketManager;
                     const requests = data as Client.ChannelActionRequest<"delete">[];
+                    if (!Array.isArray(requests)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
+                        return;
+                    }
 
                     // Process all requests individually
                     requests.forEach(async r => {
@@ -186,11 +222,18 @@ export class MethodFactory {
                  * Handle a login request to the server by a socket.
                  */
                 return async function(requests: Server.Event[K]): Promise<void> {
-                    if (!(requests instanceof Array)) {
-                        // TODO: Add bad requests error messa
+                    const s = ctx as SocketManager;
+                    if (!Array.isArray(requests)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
                         return;
                     }
-                    const s = ctx as SocketManager;
                     // Fetch the login request and if it is not valid, notify the client
                     const request: Client.LoginRequest = (requests as Client.LoginRequest[])[0];
                     if (!request) {
