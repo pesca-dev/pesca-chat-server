@@ -1,8 +1,8 @@
 import $ from "logsen";
-import socketio from "socket.io";
+import Websocket from "ws";
 import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
-import { setupUserObject } from "../middleware/userSetupMiddleware";
+import { enhance } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 
 /**
@@ -11,7 +11,7 @@ import { SocketManager } from "../sockets/socketManager";
 export default class Server {
     private static PORT = 3000;
 
-    private io: socketio.Server;
+    private ws: Websocket.Server;
     private channelManager: ChannelManager;
     private socketManager: SocketManager;
     private authenticationManager: AuthenticationManager;
@@ -20,8 +20,10 @@ export default class Server {
      * Create a new Server.
      */
     constructor() {
-        this.io = socketio();
-        this.io.use(setupUserObject);
+        this.ws = new Websocket.Server({
+            port: Server.PORT
+        });
+        // this.ws.use(setupUserObject);
         this.channelManager = new ChannelManager();
         this.socketManager = new SocketManager();
         this.authenticationManager = new AuthenticationManager();
@@ -47,11 +49,6 @@ export default class Server {
      * Start the entire application.
      */
     public start(): void {
-        this.io.listen(Server.PORT, {
-            path: "/",
-            pingInterval: 10000,
-            serveClient: false
-        });
         $.success(`Server listening on port ${Server.PORT}`);
     }
 
@@ -59,14 +56,14 @@ export default class Server {
      * Bind all relevant events.
      */
     private bind(): void {
-        this.io.on("connect", this.onConnect.bind(this));
+        this.ws.on("connection", this.onConnect.bind(this));
     }
 
     /**
      * Add a new connection.
      * @param socket socket for the new connection
      */
-    private onConnect(socket: socketio.Socket): void {
-        this.socketManager.addBasicEventsToSocket(socket);
+    private onConnect(socket: Websocket): void {
+        this.socketManager.addBasicEventsToSocket(enhance(socket));
     }
 }

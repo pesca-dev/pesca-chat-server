@@ -1,5 +1,5 @@
 import { Client } from "socket-chat-protocol";
-import { Socket } from "socket.io";
+import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 
 /**

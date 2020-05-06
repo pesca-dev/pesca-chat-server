@@ -1,7 +1,7 @@
 import $ from "logsen";
 import { Server, Client } from "socket-chat-protocol";
-import { Socket } from "socket.io";
 import { Channel } from "../channel/channel";
+import { Socket } from "./socket";
 import { SocketManager } from "./socketManager";
 
 /**
@@ -22,7 +22,7 @@ export class MethodFactory {
         ctx: any
     ): (data: Server.Event[K]) => void {
         switch (event) {
-            case "disconnect":
+            case "close":
                 /**
                  * Handle disconnects.
                  */

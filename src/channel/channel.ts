@@ -1,8 +1,8 @@
 import { EventEmitter } from "events";
 import $ from "logsen";
 import { Client, Server } from "socket-chat-protocol";
-import { Socket } from "socket.io";
 import { MethodFactory } from "../sockets/methodfactory";
+import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { SocketMap } from "../sockets/socketMap";
 
@@ -81,7 +81,7 @@ export class Channel extends EventEmitter {
 
         $.log(`Socket [${socket.id}] {User-ID: ${socket.user.id}} joined channel "${this.name}"`);
         // Upon disconnecting, leave this channel
-        this.socketManager.register(socket, "disconnect", MethodFactory.createMethod(socket, "disconnect", this));
+        this.socketManager.register(socket, "close", MethodFactory.createMethod(socket, "close", this));
         this.sockets.set(socket.id, socket);
         this.socketManager.emit(socket, "channel/join-response", [
             {

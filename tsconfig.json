@@ -60,6 +60,6 @@
         "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
         "resolveJsonModule": true
     },
-    "include": ["src/**/*.ts", "src/**/*.json", "src/**/*.js", "src/@types/**/*.d.ts"],
+    "include": ["src/**/*.ts", "src/**/*.json", "src/**/*.js"],
     "exclude": ["node_modules"]
 }

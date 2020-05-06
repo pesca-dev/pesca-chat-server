@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import { Client } from "socket-chat-protocol";
-import { Socket } from "socket.io";
+import { Socket } from "./socket";
 import { SocketManager } from "./socketManager";
 
 /**

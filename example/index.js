@@ -1,83 +1,39 @@
-const io = require("socket.io-client");
+const WebSocket = require("ws");
 
-const socket = io("http://localhost:3000");
+const ws = new WebSocket("ws://localhost:3000");
 
-socket.on("connect", () => {
-    console.log("connected!");
-
-    socket.emit("server/login-request", [
-        {
-            username: "Louis",
-            password: "password"
-        }
-    ]);
+ws.on("open", () => {
+    ws.send(
+        JSON.stringify({
+            method: "server/login-request",
+            params: [
+                {
+                    username: "Username",
+                    password: "password"
+                }
+            ]
+        })
+    );
 });
 
-socket.on("server/login-response", data => {
+ws.on("message", data => {
     console.log(data);
-    // socket.emit("channel/send-message", [
-    //     {
-    //         channel: "default",
-    //         author: "not Louis",
-    //         content: "This here is another test"
-    //     }
-    // ]);
+    const message = JSON.parse(data);
+    if (message.method === "server/login-response") {
+        ws.send(
+            JSON.stringify({
+                method: "channel/send-message",
+                params: [
+                    {
+                        channel: "default",
+                        content: "This here is a test"
+                    }
+                ]
+            })
+        );
+    }
 
-    // socket.emit("channel/leave-request", [
-    //     {
-    //         action: "leave",
-    //         channel: "default"
-    //     }
-    // ]);
-    // socket.emit("channel/join-request", [
-    //     {
-    //         action: "join",
-    //         channel: "my-channel"
-    //     }
-    // ]);
-    // socket.emit("channel/join-request", [
-    //     {
-    //         action: "join",
-    //         channel: "my-channel2",
-    //         password: "password"
-    //     }
-    // ]);
-    socket.emit("channel/delete-request", [
-        {
-            action: "delete",
-            channel: "default"
-        }
-    ]);
-    socket.emit("channel/delete-request", [
-        {
-            action: "delete",
-            channel: "my-channel"
-        }
-    ]);
-    socket.emit("channel/delete-request", [
-        {
-            action: "delete",
-            channel: "my-channel4"
-        }
-    ]);
-});
-
-socket.on("channel/delete-response", data => {
-    console.log(data);
-});
-
-socket.on("channel/join-response", data => {
-    console.log(data);
-    // socket.emit("channel/join-request", [
-    //     {
-    //         action: "join",
-    //         channel: "default"
-    //     }
-    // ]);
-});
-
-socket.on("channel/send-message", msgs => {
-    msgs.forEach(msg => {
-        console.log(`[${msg.author}@${msg.channel}] ${msg.content}`);
-    });
+    if (message.method === "channel/send-message") {
+        console.log(message.params[0].content);
+    }
 });

@@ -1,8 +1,8 @@
 import { Server, Client, SocketEventManager } from "socket-chat-protocol";
-import { Socket } from "socket.io";
 import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
 import { MethodFactory } from "./methodfactory";
+import { Socket } from "./socket";
 
 /**
  * Class for managing sockets and applying eventing on them.
@@ -69,7 +69,7 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
      * @param data data to send during this event
      */
     public async emit<K extends keyof Client.Event>(socket: Socket, event: K, data: Client.Event[K]): Promise<void> {
-        socket.emit(event, data);
+        socket.send(event, data);
     }
 
     /**
