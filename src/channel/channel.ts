@@ -79,7 +79,7 @@ export class Channel extends EventEmitter {
             return $.err("Socket already joined this channel!");
         }
 
-        $.log(`Socket [${socket.id}] {User-ID: ${socket.user.id}} joined channel "${this.name}"`);
+        $.info(`Socket [${socket.id}] {User-ID: ${socket.user.id}} joined channel "${this.name}"`);
         // Upon disconnecting, leave this channel
         this.socketManager.register(socket, "close", MethodFactory.createMethod(socket, "close", this));
         this.sockets.set(socket.id, socket);
@@ -124,7 +124,7 @@ export class Channel extends EventEmitter {
             return;
         }
         this.sockets.delete(socket.id);
-        $.log(`Socket [${socket.id}] left channel "${this.name}"`);
+        $.info(`Socket [${socket.id}] left channel "${this.name}"`);
 
         // If the leaving was issue via request, send a valid response
         if (request) {
