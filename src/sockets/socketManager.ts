@@ -1,7 +1,7 @@
 import { Server, Client, SocketEventManager } from "socket-chat-protocol";
 // import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
-import { Usermanager } from "../user/usermanager";
+import { Usermanager } from "../user/userManager";
 import { MethodFactory } from "./methodfactory";
 import { Socket } from "./socket";
 
@@ -30,10 +30,6 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
      * @param socket socket to add
      */
     public addExtendedEventsToSocket(socket: Socket): void {
-        this.channelManager.joinChannel(socket, {
-            action: "join",
-            channel: "default"
-        });
         this.register(socket, "channel/send-message", MethodFactory.createMethod(socket, "channel/send-message", this));
         this.register(socket, "channel/join-request", MethodFactory.createMethod(socket, "channel/join-request", this));
         this.register(

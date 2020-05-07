@@ -1,5 +1,4 @@
 import $ from "logsen";
-import { Client } from "socket-chat-protocol";
 import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { Channel } from "./channel";
@@ -77,24 +76,6 @@ export class ChannelManager {
         if (channel.delete(socket)) {
             this.channels.delete(name);
         }
-    }
-
-    /**
-     * Shortform for `ChannelManager.getChannel(request.channel).join(socket, request)`.
-     *
-     * Does not throw any exception if anything goes wrong.
-     */
-    public joinChannel(socket: Socket, request: Client.ChannelActionRequest<"join">): void {
-        this.channels.get(request.channel)?.join(socket, request);
-    }
-
-    /**
-     * Shortform for `ChannelManager.getChannel(request.channel).leave(socket, request)`.
-     *
-     * Does not throw any exception if anything goes wrong.
-     */
-    public leaveChannel(socket: Socket, request: Client.ChannelActionRequest<"leave">): void {
-        this.channels.get(request.channel)?.leave(socket, request);
     }
 
     /**

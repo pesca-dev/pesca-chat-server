@@ -4,7 +4,7 @@ import Websocket from "ws";
 import { ChannelManager } from "../channel/channelManager";
 import { enhance } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
-import { Usermanager } from "../user/usermanager";
+import { Usermanager } from "../user/userManager";
 
 /**
  * Class for serving as a Server.
@@ -40,10 +40,10 @@ export default class Server {
     private setup(): void {
         this.channelManager.start(this.socketManager);
         this.socketManager.start(this.channelManager, this.userManager);
-        this.userManager.start(this.socketManager);
 
         // Setup some default shit
         this.channelManager.createChannel("default", undefined);
+        this.userManager.start(this.socketManager, this.channelManager);
     }
 
     /**

@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { Client } from "socket-chat-protocol";
 import { v4 as uuid } from "uuid";
 import WebSocket from "ws";
-import { User } from "../user/usermanager";
+import { User } from "../user/user";
 
 /**
  * Class for representing a socket internally.

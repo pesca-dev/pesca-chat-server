@@ -1,7 +1,8 @@
 import { Client } from "socket-chat-protocol";
-import { Channel } from "../channel/channel";
+import { ChannelManager } from "../channel/channelManager";
 import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
+import { UserOptions, User } from "./user";
 
 const STANDARD_USERS: UserOptions[] = [
     {
@@ -10,8 +11,20 @@ const STANDARD_USERS: UserOptions[] = [
     }
 ];
 
+/**
+ * Interface representing the return value of the Credentials Check.
+ */
+export interface LoginObject {
+    success: boolean;
+    id?: string;
+}
+
+/**
+ * Class for managing users.
+ */
 export class Usermanager {
     private socketManager!: SocketManager;
+    private channelManager!: ChannelManager;
 
     private users!: Map<string, User>;
 
@@ -19,31 +32,48 @@ export class Usermanager {
         this.init();
     }
 
-    public start(socketManager: SocketManager): void {
+    public start(socketManager: SocketManager, channelManager: ChannelManager): void {
         this.socketManager = socketManager;
+        this.channelManager = channelManager;
+        this.setup();
     }
 
     private init(): void {
         this.users = new Map<string, User>();
-        this.setup();
     }
 
+    /**
+     * Setup some default data.
+     */
     private setup(): void {
         for (const o of STANDARD_USERS) {
-            const user = new User(o);
+            const user = new User(this.socketManager, o);
+            this.channelManager.getChannel("default")?.join(user, {
+                action: "join",
+                channel: "default"
+            });
             this.users.set(user.username, user);
         }
     }
 
+    /**
+     * Get a user by name.
+     * @param name name of the user to get
+     */
     public getUser(name: string): User | undefined {
         return this.users.get(name);
     }
 
+    /**
+     * Add a user.
+     * @param user user to add
+     * @returns true, if the user was successfully added
+     * @returns false, if the user could not be added
+     */
     public addUser(user: User): boolean {
         if (this.users.has(user.username)) {
             return false;
         }
-
         this.users.set(user.username, user);
         return true;
     }
@@ -82,6 +112,7 @@ export class Usermanager {
             }
 
             socket.user = user;
+            user.addSocket(socket);
             this.socketManager.addExtendedEventsToSocket(socket);
             this.socketManager.emit(socket, "server/login-response", [
                 {
@@ -117,29 +148,4 @@ export class Usermanager {
             id: "1"
         };
     }
-}
-
-export interface UserOptions {
-    id?: string;
-    username?: string;
-}
-
-export class User {
-    public id: string;
-    public username: string;
-    public channels: Map<string, Channel>;
-
-    constructor(userOptions: UserOptions) {
-        this.channels = new Map<string, Channel>();
-        this.id = userOptions.id ?? "";
-        this.username = userOptions.username ?? "";
-    }
-}
-
-/**
- * Interface representing the return value of the Credentials Check.
- */
-export interface LoginObject {
-    success: boolean;
-    id?: string;
 }

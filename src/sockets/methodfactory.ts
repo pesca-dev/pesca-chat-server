@@ -1,6 +1,6 @@
 import $ from "logsen";
 import { Server, Client } from "socket-chat-protocol";
-import { Channel } from "../channel/channel";
+import { User } from "../user/user";
 import { Socket } from "./socket";
 import { SocketManager } from "./socketManager";
 
@@ -28,7 +28,7 @@ export class MethodFactory {
                  */
                 return function(_reason: Server.Event[K]): void {
                     // Leave the channel, when you disconnect
-                    (ctx as Channel).leave(socket);
+                    (ctx as User).deleteSocket(socket);
                 };
 
             case "error":
@@ -69,7 +69,7 @@ export class MethodFactory {
                     messages.forEach(async m => {
                         const channel = s.channelManager.getChannel(m.channel);
                         // Check, if the channel exists and the socket is in this channel
-                        if (channel && channel.contains(socket)) {
+                        if (channel && socket.user.isInChannel(channel)) {
                             channel.fire("channel/send-message", [m]);
                         }
                     });
@@ -97,7 +97,7 @@ export class MethodFactory {
                         // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
-                            channel.join(socket, r);
+                            channel.join(socket.user, r);
                         } else {
                             s.emit(socket, "channel/join-response", [
                                 {
@@ -133,7 +133,7 @@ export class MethodFactory {
                         // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
-                            channel.leave(socket, r);
+                            channel.leave(socket.user, r);
                         } else {
                             s.emit(socket, "channel/leave-response", [
                                 {

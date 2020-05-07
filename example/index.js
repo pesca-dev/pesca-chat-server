@@ -8,7 +8,7 @@ ws.on("open", () => {
             method: "server/login-request",
             params: [
                 {
-                    username: "test",
+                    username: "admin",
                     password: "password"
                 }
             ]
@@ -35,5 +35,30 @@ ws.on("message", data => {
 
     if (message.method === "channel/send-message") {
         console.log(message.params[0].content);
+        ws.send(
+            JSON.stringify({
+                method: "channel/leave-request",
+                params: [
+                    {
+                        action: "leave",
+                        channel: "default"
+                    }
+                ]
+            })
+        );
+    }
+
+    if (message.method === "channel/leave-response") {
+        ws.send(
+            JSON.stringify({
+                method: "channel/create-request",
+                params: [
+                    {
+                        action: "create",
+                        channel: "my-channel"
+                    }
+                ]
+            })
+        );
     }
 });
