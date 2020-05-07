@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+    socket_server:
+        build: ../
+        restart: always
+        ports:
+            - "10080:3000"

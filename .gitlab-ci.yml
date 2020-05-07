@@ -1,0 +1,48 @@
+image: node:13.1
+
+stages:
+    - setup
+    - build
+    - deploy
+
+node:install:
+    stage: setup
+    script:
+        - npm i
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
+    artifacts:
+        paths:
+            - node_modules/
+
+build:
+    stage: build
+    script:
+        - npm run build
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
+    artifacts:
+        paths:
+            - build/
+
+docker:deploy:
+    only:
+        - master
+    image:
+        name: docker/compose:1.24.1
+        entrypoint: ["/bin/sh", "-c"]
+    stage: deploy
+    script:
+        - docker-compose -f docker/docker-compose.yml build
+        - docker-compose -f docker/docker-compose.yml up -d
+    cache:
+        key: $CI_COMMIT_REF_SLUG
+        paths:
+            - node_modules/
+        policy: pull-push
