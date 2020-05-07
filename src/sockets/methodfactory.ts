@@ -245,7 +245,7 @@ export class MethodFactory {
                             }
                         ]);
                     } else {
-                        s.authenticationManager.login(socket, request);
+                        s.userManager.login(socket, request);
                     }
                 };
 

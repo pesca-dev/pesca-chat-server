@@ -8,7 +8,7 @@ ws.on("open", () => {
             method: "server/login-request",
             params: [
                 {
-                    username: "Username",
+                    username: "test",
                     password: "password"
                 }
             ]

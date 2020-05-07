@@ -2,11 +2,7 @@ import { EventEmitter } from "events";
 import { Client } from "socket-chat-protocol";
 import { v4 as uuid } from "uuid";
 import WebSocket from "ws";
-
-interface UserObject {
-    id?: string;
-    username?: string;
-}
+import { User } from "../user/usermanager";
 
 /**
  * Class for representing a socket internally.
@@ -27,13 +23,12 @@ export class Socket extends EventEmitter {
     /**
      * User-details of this socket.
      */
-    public user: UserObject;
+    public user!: User;
 
     constructor(ws: WebSocket) {
         super();
         this.ws = ws;
         this._id = uuid();
-        this.user = {};
         this.bind();
     }
 

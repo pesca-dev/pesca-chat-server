@@ -1,6 +1,7 @@
 import { Server, Client, SocketEventManager } from "socket-chat-protocol";
-import { AuthenticationManager } from "../authentication/authenticationManager";
+// import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
+import { Usermanager } from "../user/usermanager";
 import { MethodFactory } from "./methodfactory";
 import { Socket } from "./socket";
 
@@ -9,15 +10,15 @@ import { Socket } from "./socket";
  */
 export class SocketManager implements SocketEventManager<Server.Event, Client.Event> {
     private _channelManager!: ChannelManager;
-    private _authenticationManager!: AuthenticationManager;
+    private _userManager!: Usermanager;
 
     /**
      * Start the SocketManger and hand it the current instance of ChannelManager.
      * @param channelManager current instance of the ChannelManager
      */
-    public start(channelManager: ChannelManager, authenticationManager: AuthenticationManager): void {
+    public start(channelManager: ChannelManager, userManager: Usermanager): void {
         this._channelManager = channelManager;
-        this._authenticationManager = authenticationManager;
+        this._userManager = userManager;
     }
 
     public addBasicEventsToSocket(socket: Socket): void {
@@ -79,7 +80,7 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
         return this._channelManager;
     }
 
-    public get authenticationManager(): AuthenticationManager {
-        return this._authenticationManager;
+    public get userManager(): Usermanager {
+        return this._userManager;
     }
 }

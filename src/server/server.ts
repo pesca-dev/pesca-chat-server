@@ -1,9 +1,10 @@
 import $ from "logsen";
 import Websocket from "ws";
-import { AuthenticationManager } from "../authentication/authenticationManager";
+// import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
 import { enhance } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
+import { Usermanager } from "../user/usermanager";
 
 /**
  * Class for serving as a Server.
@@ -14,7 +15,7 @@ export default class Server {
     private ws: Websocket.Server;
     private channelManager: ChannelManager;
     private socketManager: SocketManager;
-    private authenticationManager: AuthenticationManager;
+    private userManager: Usermanager;
 
     /**
      * Create a new Server.
@@ -26,7 +27,7 @@ export default class Server {
         // this.ws.use(setupUserObject);
         this.channelManager = new ChannelManager();
         this.socketManager = new SocketManager();
-        this.authenticationManager = new AuthenticationManager();
+        this.userManager = new Usermanager();
 
         this.setup();
 
@@ -38,8 +39,8 @@ export default class Server {
      */
     private setup(): void {
         this.channelManager.start(this.socketManager);
-        this.socketManager.start(this.channelManager, this.authenticationManager);
-        this.authenticationManager.start(this.socketManager);
+        this.socketManager.start(this.channelManager, this.userManager);
+        this.userManager.start(this.socketManager);
 
         // Setup some default shit
         this.channelManager.createChannel("default", undefined);
