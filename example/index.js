@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 
-const ws = new WebSocket("ws://localhost:3000");
+const ws = new WebSocket("wss://socket.bre4k3r.de:10080");
 
 ws.on("open", () => {
     ws.send(
@@ -35,17 +35,17 @@ ws.on("message", data => {
 
     if (message.method === "channel/send-message") {
         console.log(message.params[0].content);
-        ws.send(
-            JSON.stringify({
-                method: "channel/leave-request",
-                params: [
-                    {
-                        action: "leave",
-                        channel: "default"
-                    }
-                ]
-            })
-        );
+        // ws.send(
+        //     JSON.stringify({
+        //         method: "channel/leave-request",
+        //         params: [
+        //             {
+        //                 action: "leave",
+        //                 channel: "default"
+        //             }
+        //         ]
+        //     })
+        // );
     }
 
     if (message.method === "channel/leave-response") {

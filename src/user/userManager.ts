@@ -8,6 +8,10 @@ const STANDARD_USERS: UserOptions[] = [
     {
         id: "1",
         username: "admin"
+    },
+    {
+        id: "2",
+        username: "test"
     }
 ];
 
