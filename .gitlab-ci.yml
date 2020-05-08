@@ -39,8 +39,8 @@ docker:deploy:
         entrypoint: ["/bin/sh", "-c"]
     stage: deploy
     script:
-        - docker-compose -f docker/docker-compose.yml build
-        - docker-compose -f docker/docker-compose.yml up -d
+        - docker-compose -f socket-docker/docker-compose.yml build
+        - docker-compose -f socket-docker/docker-compose.yml up -d
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:
