@@ -1,7 +1,7 @@
 import { Server, Client, SocketEventManager } from "socket-chat-protocol";
 // import { AuthenticationManager } from "../authentication/authenticationManager";
 import { ChannelManager } from "../channel/channelManager";
-import { Usermanager } from "../user/usermanager";
+import { Usermanager } from "../user/userManager";
 import { MethodFactory } from "./methodfactory";
 import { Socket } from "./socket";
 

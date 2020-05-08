@@ -4,7 +4,7 @@ import Websocket from "ws";
 import { ChannelManager } from "../channel/channelManager";
 import { enhance } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
-import { Usermanager } from "../user/usermanager";
+import { Usermanager } from "../user/userManager";
 
 /**
  * Class for serving as a Server.
