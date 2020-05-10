@@ -57,7 +57,7 @@ export class Usermanager {
      * Setup some default data.
      */
     private async setup(): Promise<void> {
-        const options: UserOptions[] = await this.db.getAllUsers();
+        const options: UserOptions[] = await this.db.users.all();
         for (const o of options) {
             const user = new User(this.socketManager, o);
             const defaultChannel = this.channelManager.getChannel("default");
@@ -102,7 +102,7 @@ export class Usermanager {
                 id: uuid()
             };
 
-            if (await this.db.addUser(options)) {
+            if (await this.db.users.add(options)) {
                 const defaultChannel = this.channelManager.getChannel("default");
                 const user = new User(this.socketManager, options);
                 this.users.set(username, new User(this.socketManager, options));
@@ -186,7 +186,7 @@ export class Usermanager {
      * Check the credentials provided.
      */
     private async checkCredentials({ username, password }: Client.UserDataObject): Promise<LoginObject> {
-        const user: UserOptions | undefined = await this.db.getUser(username);
+        const user: UserOptions | undefined = await this.db.users.get(username);
         if (!user) {
             return {
                 success: false
