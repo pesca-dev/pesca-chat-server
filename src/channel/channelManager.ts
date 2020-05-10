@@ -3,6 +3,12 @@ import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { Channel } from "./channel";
 
+export interface ChannelOptions {
+    name: string;
+    owner: string;
+    password?: string;
+}
+
 /**
  * Class for managing all channels.
  */
@@ -43,7 +49,7 @@ export class ChannelManager {
 
         const ownerID = socket?.user.id ?? "-1";
 
-        this.channels.set(name, new Channel(name, this.socketManager, ownerID, password));
+        this.channels.set(name, new Channel(this.socketManager, { name, owner: ownerID, password }));
         $.info(`Channel '${name}' successfully created. Owner ID = ${ownerID}.`);
         if (socket) {
             this.socketManager.emit(socket, "channel/create-response", [

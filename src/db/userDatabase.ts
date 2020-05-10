@@ -20,10 +20,9 @@ export class UserDatabase {
     public async add(user: UserOptions): Promise<boolean> {
         return new Promise(resolve => {
             // TODO: use `getUser` instead of nested callbacks
-            this.db.find({ username: user.username }, (err: any, users: UserOptions[]) => {
+            this.db.find({ username: user.username }, (err: Error, users: UserOptions[]) => {
                 if (err || users.length > 0) {
                     resolve(false);
-                    return;
                 }
 
                 const data: UserOptions = {
@@ -48,7 +47,7 @@ export class UserDatabase {
      */
     public async get(username: string): Promise<UserOptions | undefined> {
         return new Promise(resolve => {
-            this.db.find({ username }, (err: any, users: UserOptions[]) => {
+            this.db.find({ username }, (err: Error, users: UserOptions[]) => {
                 if (err) {
                     $.err(err);
                     resolve();
@@ -59,11 +58,27 @@ export class UserDatabase {
     }
 
     /**
+     * Delete a user from the database.
+     * @param username name of the user to delete
+     */
+    public async delete(username: string): Promise<boolean> {
+        return new Promise(resolve => {
+            this.db.remove({ username }, (err: Error, _numRemoved: number) => {
+                if (err) {
+                    $.err(err);
+                    resolve(false);
+                }
+                resolve(true);
+            });
+        });
+    }
+
+    /**
      * Get all users in the database.
      */
     public async all(): Promise<UserOptions[]> {
         return new Promise(resolve => {
-            this.db.find({}, (err: any, data: UserOptions[]) => {
+            this.db.find({}, (err: Error, data: UserOptions[]) => {
                 if (err) {
                     $.err(err);
                 }

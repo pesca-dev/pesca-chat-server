@@ -5,6 +5,7 @@ import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { User } from "../user/user";
 import { UserMap } from "../user/userMap";
+import { ChannelOptions } from "./channelManager";
 /**
  * Class for representing a Chat-Channel.
  */
@@ -22,10 +23,8 @@ export class Channel extends EventEmitter {
 
     /**
      * Create a new channel.
-     * @param name name of the channel
-     * @param socketManager current instance of a SocketManager for firing events on sockets.
      */
-    constructor(name: string, socketManager: SocketManager, owner: string, password?: string) {
+    constructor(socketManager: SocketManager, { name, owner, password }: ChannelOptions) {
         super();
         this._name = name;
         this.owner = owner;
