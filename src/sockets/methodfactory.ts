@@ -97,7 +97,7 @@ export class MethodFactory {
                         // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
-                            channel.join(socket.user, r);
+                            socket.user.joinChannel(channel, r.password);
                         } else {
                             s.emit(socket, "channel/join-response", [
                                 {
@@ -133,7 +133,7 @@ export class MethodFactory {
                         // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
-                            channel.leave(socket.user, r);
+                            socket.user.leaveChannel(channel);
                         } else {
                             s.emit(socket, "channel/leave-response", [
                                 {

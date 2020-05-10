@@ -43,53 +43,50 @@ export class Channel extends EventEmitter {
     }
 
     /**
-     * Let a socket join this channel.
+     * Let a socket enter this channel.
      * @param user socket to join this channel
      */
-    public join(user: User, request: Client.ChannelActionRequest<"join">): void {
-        // If names are not the same do nothing
-        if (this.name !== request.channel) {
-            return;
-        }
-
+    public enter(user: User, password?: string): boolean {
         // If password is incorrect, send failure-response to the client
-        if (this.password && request.password !== this.password) {
+        if (this.password && password !== this.password) {
             user.fire("channel/join-response", [
                 {
-                    action: request.action,
-                    channel: request.channel,
+                    action: "join",
+                    channel: this.name,
                     success: false,
                     reason: "Invalid password provided"
                 }
             ]);
-            return $.err("Invalid password provided!");
+            $.err("Invalid password provided!");
+            return false;
         }
 
         // If socket is already in this channel, send success-response to the client
         if (this.users.has(user.username)) {
             user.fire("channel/join-response", [
                 {
-                    action: request.action,
-                    channel: request.channel,
+                    action: "join",
+                    channel: this.name,
                     success: true,
                     reason: "Socket already joined this channel"
                 }
             ]);
-            return $.err("Socket already joined this channel!");
+            $.err("Socket already joined this channel!");
+            return true;
         }
 
         $.info(`User [${user.id}] joined channel "${this.name}"`);
         // Upon disconnecting, leave this channel
         // this.socketManager.register(socket, "close", MethodFactory.createMethod(socket, "close", this));
         this.users.set(user.username, user);
-        user.addChannel(this);
         user.fire("channel/join-response", [
             {
-                action: request.action,
-                channel: request.channel,
+                action: "join",
+                channel: this.name,
                 success: true
             }
         ]);
+        return true;
     }
 
     /**
@@ -101,42 +98,32 @@ export class Channel extends EventEmitter {
     }
 
     /**
-     * Let a socket leave this channel.
+     * Let a user leave this channel.
      * @param user socket to leave this channel
      */
-    public leave(user: User, request?: Client.ChannelActionRequest<"leave">): void {
-        // If the name of the requested channel is wrong or the socket is not in this channel anymore, do nothing
-        if (request && request.channel !== this.name) {
-            return;
-        }
-
+    public leave(user: User): void {
         if (!this.users.has(user.username)) {
-            if (request) {
-                user.fire("channel/leave-response", [
-                    {
-                        action: "leave",
-                        channel: request.channel,
-                        success: true,
-                        reason: "You are no member of this channel!"
-                    }
-                ]);
-            }
-            return;
-        }
-        this.users.delete(user.username);
-        user.removeChannel(this);
-        $.info(`Socket [${user.username}] left channel "${this.name}"`);
-
-        // If the leaving was issue via request, send a valid response
-        if (request) {
             user.fire("channel/leave-response", [
                 {
                     action: "leave",
-                    channel: request.channel,
-                    success: true
+                    channel: this.name,
+                    success: true,
+                    reason: "You are no member of this channel!"
                 }
             ]);
+            return;
         }
+        this.users.delete(user.username);
+        $.info(`Socket [${user.username}] left channel "${this.name}"`);
+
+        // If the leaving was issue via request, send a valid response
+        user.fire("channel/leave-response", [
+            {
+                action: "leave",
+                channel: this.name,
+                success: true
+            }
+        ]);
     }
 
     /**
@@ -187,7 +174,7 @@ export class Channel extends EventEmitter {
                     message: "The channel got closed and due to that, you got kicked out of it."
                 }
             ]);
-            this.leave(user);
+            user.leaveChannel(this);
         });
         this.socketManager.emit(socket, "channel/delete-response", [
             {

@@ -52,10 +52,10 @@ export class Usermanager {
     private setup(): void {
         for (const o of STANDARD_USERS) {
             const user = new User(this.socketManager, o);
-            this.channelManager.getChannel("default")?.join(user, {
-                action: "join",
-                channel: "default"
-            });
+            const defaultChannel = this.channelManager.getChannel("default");
+            if (defaultChannel) {
+                user.joinChannel(defaultChannel);
+            }
             this.users.set(user.username, user);
         }
     }

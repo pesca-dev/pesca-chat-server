@@ -63,18 +63,21 @@ export class User extends EventEmitter {
     }
 
     /**
-     * Add a channel to this user.
-     * @param channel channel to add.
+     * Join a channel.
+     * @param channel channel to join
      */
-    public addChannel(channel: Channel): void {
-        this._channels.set(channel.name, channel);
+    public joinChannel(channel: Channel, password?: string): void {
+        if (channel.enter(this, password)) {
+            this._channels.set(channel.name, channel);
+        }
     }
 
     /**
-     * Remove a channel from this user.
-     * @param channel channel to remove
+     * Leave a channel.
+     * @param channel channel to leave
      */
-    public removeChannel(channel: Channel): void {
+    public leaveChannel(channel: Channel): void {
+        channel.leave(this);
         this._channels.delete(channel.name);
     }
 
