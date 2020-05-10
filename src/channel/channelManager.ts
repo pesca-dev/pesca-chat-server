@@ -13,6 +13,7 @@ export interface ChannelOptions {
  * Class for managing all channels.
  */
 export class ChannelManager {
+    // TODO: Use Database
     private socketManager!: SocketManager;
     private channels!: Map<string, Channel>;
 
