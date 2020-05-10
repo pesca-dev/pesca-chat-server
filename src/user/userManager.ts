@@ -54,7 +54,7 @@ export class Usermanager {
             const user = new User(this.socketManager, o);
             const defaultChannel = this.channelManager.getChannel("default");
             if (defaultChannel) {
-                user.joinChannel(defaultChannel);
+                user.channels.join(defaultChannel);
             }
             this.users.set(user.username, user);
         }

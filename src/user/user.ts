@@ -5,6 +5,7 @@ import { MethodFactory } from "../sockets/methodfactory";
 import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { SocketMap } from "../sockets/socketMap";
+import { UserChannelManager } from "./userChannelManager";
 
 /**
  * Options for creating a new user.
@@ -22,13 +23,13 @@ export class User extends EventEmitter {
 
     private _id: string;
     private _username: string;
-    private _channels: Map<string, Channel>;
+    private _channels: UserChannelManager;
     private _sockets: SocketMap;
 
     constructor(socketManager: SocketManager, userOptions: UserOptions) {
         super();
         this.socketManager = socketManager;
-        this._channels = new Map<string, Channel>();
+        this._channels = new UserChannelManager(this);
         this._id = userOptions.id ?? "";
         this._username = userOptions.username ?? "";
         this._sockets = new SocketMap(this.socketManager);
@@ -65,28 +66,28 @@ export class User extends EventEmitter {
     /**
      * Join a channel.
      * @param channel channel to join
+     * @deprecated
      */
     public joinChannel(channel: Channel, password?: string): void {
-        if (channel.enter(this, password)) {
-            this._channels.set(channel.name, channel);
-        }
+        this._channels.join(channel, password);
     }
 
     /**
      * Leave a channel.
      * @param channel channel to leave
+     * @deprecated
      */
     public leaveChannel(channel: Channel): void {
-        channel.leave(this);
-        this._channels.delete(channel.name);
+        this._channels.leave(channel);
     }
 
     /**
      * Check, if user is in channel.
      * @param channel channel to check
+     * @deprecated
      */
     public isInChannel(channel: Channel): boolean {
-        return this._channels.has(channel.name);
+        return this._channels.has(channel);
     }
 
     /**
@@ -106,7 +107,7 @@ export class User extends EventEmitter {
     /**
      * The channels, this user is in.
      */
-    public get channels(): string[] {
-        return [...this._channels.keys()];
+    public get channels(): UserChannelManager {
+        return this._channels;
     }
 }

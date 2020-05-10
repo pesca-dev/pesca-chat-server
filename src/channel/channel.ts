@@ -174,7 +174,7 @@ export class Channel extends EventEmitter {
                     message: "The channel got closed and due to that, you got kicked out of it."
                 }
             ]);
-            user.leaveChannel(this);
+            user.channels.leave(this);
         });
         this.socketManager.emit(socket, "channel/delete-response", [
             {

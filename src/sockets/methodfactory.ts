@@ -69,7 +69,7 @@ export class MethodFactory {
                     messages.forEach(async m => {
                         const channel = s.channelManager.getChannel(m.channel);
                         // Check, if the channel exists and the socket is in this channel
-                        if (channel && socket.user.isInChannel(channel)) {
+                        if (channel && socket.user.channels.has(channel)) {
                             channel.fire("channel/send-message", [m]);
                         }
                     });
@@ -97,7 +97,7 @@ export class MethodFactory {
                         // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
-                            socket.user.joinChannel(channel, r.password);
+                            socket.user.channels.join(channel, r.password);
                         } else {
                             s.emit(socket, "channel/join-response", [
                                 {
@@ -133,7 +133,7 @@ export class MethodFactory {
                         // Fetch the channel and check, if it exists
                         const channel = s.channelManager.getChannel(r.channel);
                         if (channel) {
-                            socket.user.leaveChannel(channel);
+                            socket.user.channels.leave(channel);
                         } else {
                             s.emit(socket, "channel/leave-response", [
                                 {
