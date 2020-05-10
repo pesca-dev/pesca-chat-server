@@ -6,3 +6,8 @@ services:
         restart: always
         ports:
             - "10080:3000"
+        volumes:
+            - db-data:/db
+
+volumes:
+    db-data:

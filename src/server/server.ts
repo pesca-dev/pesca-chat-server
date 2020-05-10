@@ -28,7 +28,6 @@ export default class Server {
         });
 
         this.databaseManager = new DatabaseManager();
-        // this.ws.use(setupUserObject);
         this.channelManager = new ChannelManager();
         this.socketManager = new SocketManager();
         this.userManager = new Usermanager(this.databaseManager);
