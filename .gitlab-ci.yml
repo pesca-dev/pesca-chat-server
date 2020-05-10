@@ -9,6 +9,7 @@ node:install:
     stage: setup
     script:
         - npm i
+        - npm upgrade
     cache:
         key: $CI_COMMIT_REF_SLUG
         paths:

@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 
-const ws = new WebSocket("ws://localhost:3000");
+const ws = new WebSocket("ws://bre4k3r.de:10080");
 
 ws.on("open", () => {
     ws.send(
@@ -8,8 +8,8 @@ ws.on("open", () => {
             method: "server/register-request",
             params: [
                 {
-                    username: "test",
-                    password: "test"
+                    username: "admin",
+                    password: "password"
                 }
             ]
         })
