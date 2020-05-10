@@ -235,7 +235,7 @@ export class MethodFactory {
                         return;
                     }
                     // Fetch the login request and if it is not valid, notify the client
-                    const request: Client.LoginRequest = (requests as Client.LoginRequest[])[0];
+                    const request: Client.UserDataObject = (requests as Client.UserDataObject[])[0];
                     if (!request) {
                         s.emit(socket, "server/login-response", [
                             {
@@ -246,6 +246,38 @@ export class MethodFactory {
                         ]);
                     } else {
                         s.userManager.login(socket, request);
+                    }
+                };
+
+            case "server/register-request":
+                /**
+                 * Handle a registration-request.
+                 */
+                return async function(requests: Server.Event[K]): Promise<void> {
+                    const s = ctx as SocketManager;
+                    if (!Array.isArray(requests)) {
+                        s.emit(socket, "error/bad-request", [
+                            {
+                                type: "bad request",
+                                code: 400,
+                                request: event,
+                                message: "Payload needs to be an array!"
+                            }
+                        ]);
+                        return;
+                    }
+                    // Fetch the registration request and if it is not valid, notify the client
+                    const request: Client.UserDataObject = (requests as Client.UserDataObject[])[0];
+                    if (!request) {
+                        s.emit(socket, "server/register-response", [
+                            {
+                                username: "",
+                                success: false,
+                                id: ""
+                            }
+                        ]);
+                    } else {
+                        s.userManager.register(socket, request);
                     }
                 };
 

@@ -23,6 +23,11 @@ export class SocketManager implements SocketEventManager<Server.Event, Client.Ev
 
     public addBasicEventsToSocket(socket: Socket): void {
         this.register(socket, "server/login-request", MethodFactory.createMethod(socket, "server/login-request", this));
+        this.register(
+            socket,
+            "server/register-request",
+            MethodFactory.createMethod(socket, "server/register-request", this)
+        );
     }
 
     /**

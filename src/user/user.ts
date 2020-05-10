@@ -12,7 +12,8 @@ import { UserChannelManager } from "./userChannelManager";
  */
 export interface UserOptions {
     id?: string;
-    username?: string;
+    username: string;
+    password: string;
 }
 
 /**
