@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 
-const ws = new WebSocket("ws://localhost:3000");
+const ws = new WebSocket("ws://bre4k3r.de:10080");
 
 ws.on("open", () => {
     ws.send(
@@ -22,11 +22,12 @@ ws.on("message", data => {
     if (message.method === "server/login-response") {
         ws.send(
             JSON.stringify({
-                method: "channel/send-message",
+                method: "channel/create-request",
                 params: [
                     {
-                        channel: "default",
-                        content: "This here is a test"
+                        method: "create",
+                        channel: "default"
+                        // content: "This here is a test"
                     }
                 ]
             })
