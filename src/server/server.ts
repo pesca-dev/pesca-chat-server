@@ -5,7 +5,7 @@ import { ChannelManager } from "../channel/channelManager";
 import { DatabaseManager } from "../db/databaseManager";
 import { enhance } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
-import { Usermanager } from "../user/userManager";
+import { UserManager } from "../user/userManager";
 
 /**
  * Class for serving as a Server.
@@ -17,7 +17,7 @@ export default class Server {
     private databaseManager: DatabaseManager;
     private channelManager: ChannelManager;
     private socketManager: SocketManager;
-    private userManager: Usermanager;
+    private userManager: UserManager;
 
     /**
      * Create a new Server.
@@ -30,19 +30,26 @@ export default class Server {
         this.databaseManager = new DatabaseManager();
         this.channelManager = new ChannelManager();
         this.socketManager = new SocketManager();
-        this.userManager = new Usermanager(this.databaseManager);
+        this.userManager = new UserManager(this.databaseManager);
     }
 
     /**
      * Setup all managers and add the default channels.
      */
     private async setup(): Promise<void> {
-        await this.channelManager.start(this.socketManager, this.databaseManager);
-        this.socketManager.start(this.channelManager, this.userManager);
+        this.socketManager.init(this.channelManager, this.userManager);
 
-        // Setup some default shit
-        // await this.channelManager.createChannel("default", undefined);
-        await this.userManager.start(this.socketManager, this.channelManager);
+        // Initialize all managers
+        await this.channelManager.init(this.socketManager, this.userManager, this.databaseManager);
+        await this.userManager.init(this.socketManager, this.channelManager);
+
+        // Load their basic data
+        await this.channelManager.loadChannels();
+        await this.userManager.loadUsers();
+
+        // Load their cyclic data
+        await this.channelManager.joinUsers();
+        await this.userManager.joinChannels();
     }
 
     /**

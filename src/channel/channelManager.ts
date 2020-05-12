@@ -2,6 +2,8 @@ import $ from "logsen";
 import { DatabaseManager } from "../db/databaseManager";
 import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
+import { User } from "../user/user";
+import { UserManager } from "../user/userManager";
 import { Channel } from "./channel";
 
 export interface ChannelOptions {
@@ -14,29 +16,45 @@ export interface ChannelOptions {
  * Class for managing all channels.
  */
 export class ChannelManager {
-    // TODO: Use Database
     private socketManager!: SocketManager;
-    private channels!: Map<string, Channel>;
+    private userManager!: UserManager;
     private db!: DatabaseManager;
+    private channels!: Map<string, Channel>;
 
     /**
-     * Start the channel-manager and hand it the current instance of SocketManager.
+     * Initialize the channel-manager and hand it the current instance of SocketManager.
      * @param socketManager current instance of SocketManager.
      */
-    public async start(socketManager: SocketManager, db: DatabaseManager): Promise<void> {
+    public async init(socketManager: SocketManager, userManager: UserManager, db: DatabaseManager): Promise<void> {
         this.socketManager = socketManager;
+        this.userManager = userManager;
         this.db = db;
         this.channels = new Map<string, Channel>();
-        await this.setup();
     }
 
     /**
-     * Setup everything from the database.
+     * Load all channels from the database.
      */
-    private async setup(): Promise<void> {
+    public async loadChannels(): Promise<void> {
         const channels = await this.db.channels.all();
         for (const options of channels) {
-            this.channels.set(options.name, new Channel(this.socketManager, options));
+            this.channels.set(options.name, new Channel(this.socketManager, this.db, options));
+        }
+    }
+
+    /**
+     * Load and setup the users from the database.
+     */
+    public async joinUsers(): Promise<void> {
+        for (const [name, channel] of this.channels) {
+            const users = (await this.db.joins.getForChannel(name)).reduce((memo: User[], cur) => {
+                const user = this.userManager.getUser(cur.user);
+                if (user) {
+                    memo.push(user);
+                }
+                return memo;
+            }, []);
+            channel.setup(users);
         }
     }
 
@@ -70,7 +88,7 @@ export class ChannelManager {
         // Create new channel options
         const channelOptions: ChannelOptions = { name, owner: owner ?? "-1", password };
         // Create channel with this options
-        this.channels.set(name, new Channel(this.socketManager, channelOptions));
+        this.channels.set(name, new Channel(this.socketManager, this.db, channelOptions));
         // Add the channel to the database
         this.db.channels.add(channelOptions);
 

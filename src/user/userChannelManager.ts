@@ -14,6 +14,15 @@ export class UserChannelManager {
     }
 
     /**
+     * Setup this manager with a given list of channels to join.
+     */
+    public async setup(channels: Channel[]): Promise<void> {
+        channels.forEach(async channel => {
+            this._channels.set(channel.name, channel);
+        });
+    }
+
+    /**
      * Join a specific channel.
      * @param channel channel to join
      * @param password password for the channel, if it needs one

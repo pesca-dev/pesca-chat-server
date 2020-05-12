@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import $ from "logsen";
 import { Client, Server } from "socket-chat-protocol";
+import { DatabaseManager } from "../db/databaseManager";
 import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { User } from "../user/user";
@@ -15,6 +16,7 @@ export class Channel extends EventEmitter {
     private owner: string;
 
     private socketManager: SocketManager;
+    private db: DatabaseManager;
 
     /**
      * Map for managing sockets in this channel.
@@ -24,14 +26,25 @@ export class Channel extends EventEmitter {
     /**
      * Create a new channel.
      */
-    constructor(socketManager: SocketManager, { name, owner, password }: ChannelOptions) {
+    constructor(socketManager: SocketManager, db: DatabaseManager, { name, owner, password }: ChannelOptions) {
         super();
         this._name = name;
         this.owner = owner;
         this.password = password;
         this.socketManager = socketManager;
+        this.db = db;
         this.users = new UserMap();
         this.bind();
+    }
+
+    /**
+     * Set this channel up. Enter all provied users into it.
+     * @param users users to enter
+     */
+    public async setup(users: User[]): Promise<void> {
+        users.forEach(u => {
+            this.users.set(u.username, u);
+        });
     }
 
     /**
@@ -74,10 +87,10 @@ export class Channel extends EventEmitter {
             return true;
         }
 
-        $.info(`User [${user.id}] joined channel "${this.name}"`);
-        // Upon disconnecting, leave this channel
-        // this.socketManager.register(socket, "close", MethodFactory.createMethod(socket, "close", this));
         this.users.set(user.username, user);
+        this.db.joins.join(user.username, this.name);
+        $.info(`User [${user.id}] joined channel "${this.name}"`);
+
         user.fire("channel/join-response", [
             {
                 action: "join",
@@ -113,6 +126,7 @@ export class Channel extends EventEmitter {
             return;
         }
         this.users.delete(user.username);
+        this.db.joins.leave(user.username, this.name);
         $.info(`Socket [${user.username}] left channel "${this.name}"`);
 
         // If the leaving was issue via request, send a valid response

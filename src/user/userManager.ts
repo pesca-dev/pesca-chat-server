@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { Client } from "socket-chat-protocol";
 import { v4 as uuid } from "uuid";
+import { Channel } from "../channel/channel";
 import { ChannelManager } from "../channel/channelManager";
 import { DatabaseManager } from "../db/databaseManager";
 import { Socket } from "../sockets/socket";
@@ -31,7 +32,7 @@ export interface LoginObject {
 /**
  * Class for managing users.
  */
-export class Usermanager {
+export class UserManager {
     private socketManager!: SocketManager;
     private channelManager!: ChannelManager;
     private db: DatabaseManager;
@@ -40,31 +41,46 @@ export class Usermanager {
 
     constructor(db: DatabaseManager) {
         this.db = db;
-        this.init();
-    }
-
-    public async start(socketManager: SocketManager, channelManager: ChannelManager): Promise<void> {
-        this.socketManager = socketManager;
-        this.channelManager = channelManager;
-        await this.setup();
-    }
-
-    private init(): void {
         this.users = new Map<string, User>();
     }
 
     /**
-     * Setup some default data.
+     * Initialize the cyclic dependencies.
+     * @param socketManager current instance of SocketManager
+     * @param channelManager current instance of ChannelManager
      */
-    private async setup(): Promise<void> {
+    public async init(socketManager: SocketManager, channelManager: ChannelManager): Promise<void> {
+        this.socketManager = socketManager;
+        this.channelManager = channelManager;
+    }
+
+    /**
+     * Initialize users from the database.
+     */
+    public async loadUsers(): Promise<void> {
         const options: UserOptions[] = await this.db.users.all();
         for (const o of options) {
+            // Create the user from the database
             const user = new User(this.socketManager, o);
-            const defaultChannel = this.channelManager.getChannel("default");
-            if (defaultChannel) {
-                user.channels.join(defaultChannel);
-            }
             this.users.set(user.username, user);
+        }
+    }
+
+    /**
+     * Load channels from the database.
+     */
+    public async joinChannels(): Promise<void> {
+        for (const [name, user] of this.users) {
+            // Get all channels he is in
+            const channels = (await this.db.joins.getForUser(name)).reduce((memo: Channel[], cur) => {
+                const ch = this.channelManager.getChannel(cur.channel);
+                if (ch) {
+                    memo.push(ch);
+                }
+                return memo;
+            }, []);
+
+            user.setup(channels);
         }
     }
 

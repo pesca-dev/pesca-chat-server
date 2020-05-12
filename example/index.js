@@ -5,7 +5,7 @@ const ws = new WebSocket("ws://localhost:3000");
 ws.on("open", () => {
     ws.send(
         JSON.stringify({
-            method: "server/register-request",
+            method: "server/login-request",
             params: [
                 {
                     username: "admin",
@@ -19,18 +19,18 @@ ws.on("open", () => {
 ws.on("message", data => {
     console.log(data);
     const message = JSON.parse(data);
-    if (message.method === "server/register-response") {
-        // ws.send(
-        //     JSON.stringify({
-        //         method: "channel/send-message",
-        //         params: [
-        //             {
-        //                 channel: "default",
-        //                 content: "This here is a test"
-        //             }
-        //         ]
-        //     })
-        // );
+    if (message.method === "server/login-response") {
+        ws.send(
+            JSON.stringify({
+                method: "channel/send-message",
+                params: [
+                    {
+                        channel: "default",
+                        content: "This here is a test"
+                    }
+                ]
+            })
+        );
     }
 
     if (message.method === "channel/send-message") {

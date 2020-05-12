@@ -37,6 +37,13 @@ export class User extends EventEmitter {
     }
 
     /**
+     * Setup this user with a given list of channels to join.
+     */
+    public async setup(channels: Channel[]): Promise<void> {
+        this.channels.setup(channels);
+    }
+
+    /**
      * Fire an event on all connected sockets for this user.
      * @param event event to emit
      * @param data data to send during this event
