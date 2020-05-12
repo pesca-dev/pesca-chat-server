@@ -180,7 +180,7 @@ export class MethodFactory {
                             return;
                         }
                         // Create a new channel
-                        s.channelManager.createChannel(r.channel, r.password, socket);
+                        s.channelManager.createChannel(r.channel, r.password, socket.user.id, socket);
                     });
                 };
 

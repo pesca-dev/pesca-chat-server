@@ -37,11 +37,11 @@ export default class Server {
      * Setup all managers and add the default channels.
      */
     private async setup(): Promise<void> {
-        this.channelManager.start(this.socketManager);
+        await this.channelManager.start(this.socketManager, this.databaseManager);
         this.socketManager.start(this.channelManager, this.userManager);
 
         // Setup some default shit
-        this.channelManager.createChannel("default", undefined);
+        await this.channelManager.createChannel("default", undefined);
         await this.userManager.start(this.socketManager, this.channelManager);
     }
 

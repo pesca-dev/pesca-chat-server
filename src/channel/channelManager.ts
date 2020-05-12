@@ -1,4 +1,5 @@
 import $ from "logsen";
+import { DatabaseManager } from "../db/databaseManager";
 import { Socket } from "../sockets/socket";
 import { SocketManager } from "../sockets/socketManager";
 import { Channel } from "./channel";
@@ -16,14 +17,27 @@ export class ChannelManager {
     // TODO: Use Database
     private socketManager!: SocketManager;
     private channels!: Map<string, Channel>;
+    private db!: DatabaseManager;
 
     /**
      * Start the channel-manager and hand it the current instance of SocketManager.
      * @param socketManager current instance of SocketManager.
      */
-    public start(socketManager: SocketManager): void {
+    public async start(socketManager: SocketManager, db: DatabaseManager): Promise<void> {
         this.socketManager = socketManager;
+        this.db = db;
         this.channels = new Map<string, Channel>();
+        await this.setup();
+    }
+
+    /**
+     * Setup everything from the database.
+     */
+    private async setup(): Promise<void> {
+        const channels = await this.db.channels.all();
+        for (const { name, owner, password } of channels) {
+            this.createChannel(name, password, owner);
+        }
     }
 
     /**
@@ -32,7 +46,12 @@ export class ChannelManager {
      * @param pasword password for the channel, may be undefined, so channel has no password
      * @param socket socket, who created this channel. Owner-ID will be taken from it
      */
-    public createChannel(name: string, password: string | undefined, socket?: Socket): void {
+    public async createChannel(
+        name: string,
+        password: string | undefined,
+        owner?: string,
+        socket?: Socket
+    ): Promise<void> {
         if (this.channels.has(name)) {
             if (socket) {
                 this.socketManager.emit(socket, "channel/create-response", [
@@ -48,10 +67,14 @@ export class ChannelManager {
             return;
         }
 
-        const ownerID = socket?.user.id ?? "-1";
+        // Create new channel options
+        const channelOptions: ChannelOptions = { name, owner: owner ?? "-1", password };
+        // Create channel with this options
+        this.channels.set(name, new Channel(this.socketManager, channelOptions));
+        // Add the channel to the database
+        this.db.channels.add(channelOptions);
 
-        this.channels.set(name, new Channel(this.socketManager, { name, owner: ownerID, password }));
-        $.info(`Channel '${name}' successfully created. Owner ID = ${ownerID}.`);
+        $.info(`Channel '${name}' successfully created. Owner ID = ${owner}.`);
         if (socket) {
             this.socketManager.emit(socket, "channel/create-response", [
                 {
@@ -82,6 +105,7 @@ export class ChannelManager {
         }
         if (channel.delete(socket)) {
             this.channels.delete(name);
+            this.db.channels.delete(name);
         }
     }
 
