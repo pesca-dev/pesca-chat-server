@@ -41,7 +41,7 @@ export default class Server {
         this.socketManager.start(this.channelManager, this.userManager);
 
         // Setup some default shit
-        await this.channelManager.createChannel("default", undefined);
+        // await this.channelManager.createChannel("default", undefined);
         await this.userManager.start(this.socketManager, this.channelManager);
     }
 

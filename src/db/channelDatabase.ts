@@ -25,6 +25,7 @@ export class ChannelDatabase {
             this.db.find({ name: channel.name }, (err: Error, channels: ChannelOptions[]) => {
                 if (err || channels.length > 0) {
                     resolve(false);
+                    return;
                 }
                 this.db.insert(channel, err => {
                     if (err) {
@@ -47,6 +48,7 @@ export class ChannelDatabase {
                 if (err) {
                     $.err(err);
                     resolve();
+                    return;
                 }
                 resolve(channels ? channels[0] : undefined);
             });
@@ -63,6 +65,7 @@ export class ChannelDatabase {
                 if (err) {
                     $.err(err);
                     resolve(false);
+                    return;
                 }
                 resolve(true);
             });

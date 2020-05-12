@@ -23,6 +23,7 @@ export class UserDatabase {
             this.db.find({ username: user.username }, (err: Error, users: UserOptions[]) => {
                 if (err || users.length > 0) {
                     resolve(false);
+                    return;
                 }
 
                 const data: UserOptions = {
@@ -34,6 +35,7 @@ export class UserDatabase {
                     if (err) {
                         $.err(err);
                         resolve(false);
+                        return;
                     }
                     resolve(true);
                 });
@@ -51,6 +53,7 @@ export class UserDatabase {
                 if (err) {
                     $.err(err);
                     resolve();
+                    return;
                 }
                 resolve(users ? users[0] : undefined);
             });
@@ -67,6 +70,7 @@ export class UserDatabase {
                 if (err) {
                     $.err(err);
                     resolve(false);
+                    return;
                 }
                 resolve(true);
             });

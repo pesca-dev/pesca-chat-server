@@ -35,8 +35,8 @@ export class ChannelManager {
      */
     private async setup(): Promise<void> {
         const channels = await this.db.channels.all();
-        for (const { name, owner, password } of channels) {
-            this.createChannel(name, password, owner);
+        for (const options of channels) {
+            this.channels.set(options.name, new Channel(this.socketManager, options));
         }
     }
 
