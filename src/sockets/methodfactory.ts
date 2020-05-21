@@ -1,5 +1,6 @@
 import $ from "logsen";
 import { Server, Client } from "socket-chat-protocol";
+import { v4 as uuid } from "uuid";
 import { User } from "../user/user";
 import { Socket } from "./socket";
 import { SocketManager } from "./socketManager";
@@ -61,7 +62,7 @@ export class MethodFactory {
                         return {
                             ...m,
                             author: socket.user.username ?? "Unknown User",
-                            id: `${Math.floor(Math.random() * 1000000)}`,
+                            id: uuid(),
                             timestamp: `${Date.now()}`
                         };
                     });

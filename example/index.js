@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 
-const ws = new WebSocket("ws://bre4k3r.de:10080");
+const ws = new WebSocket("ws://localhost:8080");
 
 ws.on("open", () => {
     ws.send(
