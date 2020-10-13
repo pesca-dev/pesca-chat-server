@@ -1,19 +1,39 @@
 import $ from "logsen";
-import Server from "./server/server";
+import fs from "fs";
+import { join } from "path";
 
-(() => {
-    fakeConsoleLog();
+void (async () => {
     $.setTimestamp($.defaultTimestamp);
-    new Server().start();
+    await init();
 })();
 
-function fakeConsoleLog(): void {
-    // tslint:disable-next-line: no-console
-    const l = console.log;
-    // tslint:disable-next-line: no-console
-    console.log = function(): void {
-        // process.stdout.clearLine();
-        // process.stdout.cursorTo(0);
-        l(...arguments);
-    };
+/**
+ * Initialize everything.
+ */
+async function init(): Promise<void> {
+    $.setTimestamp($.defaultTimestamp);
+    await readDirectory(__dirname);
+}
+
+/**
+ * Read a directory recursively and import all files in there.
+ *
+ * @param dir
+ */
+async function readDirectory(dir: string): Promise<void> {
+    if (dir.includes("node_modules")) {
+        return;
+    }
+    const paths = fs.readdirSync(dir, {
+        withFileTypes: true
+    });
+    const promises: Promise<void>[] = [];
+    for (const p of paths) {
+        if (!p.isDirectory()) {
+            promises.push(import(join(dir, p.name)));
+        } else {
+            promises.push(readDirectory(join(dir, p.name)));
+        }
+    }
+    await Promise.all(promises);
 }
