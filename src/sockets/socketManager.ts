@@ -19,6 +19,8 @@ export class SocketManager {
      */
     public addSocket(socket: Socket) {
         this.sockets.set(socket.id, socket);
+
+        // Bind to the close event and remove the socket from the map
         socket.on("close", () => {
             this.sockets.delete(socket.id);
         });
