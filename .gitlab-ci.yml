@@ -1,7 +1,12 @@
-# image: node:latest
+image: node:latest
 
-# stages:
-#     - setup
+stages:
+    - setup
+
+test:
+    stage: setup,
+    script:
+        - echo "test"
 #     - build
 #     - deploy
 
