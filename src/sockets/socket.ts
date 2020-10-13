@@ -2,11 +2,17 @@ import WebSocket from "ws";
 import { EventEmitter } from "events";
 import { v4 as uuid } from "uuid";
 
+/**
+ * Structure of events
+ */
 interface SocketEvent {
     method: string;
     payload: any | any[];
 }
 
+/**
+ * Class for wrapping around a single socket connection.
+ */
 export class Socket extends EventEmitter {
     private _id: string;
 
@@ -17,6 +23,9 @@ export class Socket extends EventEmitter {
         this.bind();
     }
 
+    /**
+     * Bind all relevant events.
+     */
     private bind(): void {
         this.ws.on("message", this.onMessage.bind(this));
 
@@ -31,6 +40,11 @@ export class Socket extends EventEmitter {
         });
     }
 
+    /**
+     * Handle the reception of data over the websocket.
+     *
+     * @param data data received of the websocket
+     */
     private onMessage(data: any): void {
         try {
             const parsed: SocketEvent = JSON.parse(data);
@@ -40,7 +54,8 @@ export class Socket extends EventEmitter {
                 this.emit(parsed.method, parsed.payload);
             }
         } catch (e) {
-            console.log("Didnt work....", e);
+            // Close socket upon receiving an incorrect message
+            this.ws.close();
         }
     }
 

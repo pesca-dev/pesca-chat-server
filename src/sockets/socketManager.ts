@@ -1,6 +1,9 @@
 import { Singleton } from "dependory";
 import { Socket } from "./socket";
 
+/**
+ * Class for managing all sockets currently connected to server.
+ */
 @Singleton()
 export class SocketManager {
     private sockets: Map<string, Socket>;
