@@ -11,10 +11,13 @@ import { SocketManager } from "../sockets/socketManager";
 export class Server extends Websocket.Server {
     private static PORT = 3000;
 
-    constructor(private readonly socketManager: SocketManager) {
+    private socketManager: SocketManager;
+
+    public constructor(socketManager: SocketManager) {
         super({
             port: Server.PORT
         });
+        this.socketManager = socketManager;
 
         this.bind();
     }
@@ -37,7 +40,11 @@ export class Server extends Websocket.Server {
         this.socketManager.addSocket(new Socket(socket));
     }
 
-    private onClose(): void {}
+    private onClose(): void {
+        // Perform actions on closing sockets
+    }
 
-    private onError(): void {}
+    private onError(): void {
+        // Perform actions on errors
+    }
 }

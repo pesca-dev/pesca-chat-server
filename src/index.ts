@@ -1,6 +1,6 @@
-import $ from "logsen";
 import fs from "fs";
 import { join } from "path";
+import $ from "logsen";
 
 void (async () => {
     $.setTimestamp($.defaultTimestamp);

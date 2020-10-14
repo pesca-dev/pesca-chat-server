@@ -1,5 +1,6 @@
-import WebSocket from "ws";
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { EventEmitter } from "events";
+import WebSocket from "ws";
 import { v4 as uuid } from "uuid";
 
 /**
@@ -16,10 +17,12 @@ interface SocketEvent {
 export class Socket extends EventEmitter {
     private _id: string;
 
-    public constructor(private readonly ws: WebSocket) {
-        super();
+    private ws: WebSocket;
 
+    public constructor(ws: WebSocket) {
+        super();
         this._id = uuid();
+        this.ws = ws;
         this.bind();
     }
 
@@ -63,5 +66,7 @@ export class Socket extends EventEmitter {
         return this._id;
     }
 
-    private onClose(): void {}
+    private onClose(): void {
+        // perform actions when closing the connection
+    }
 }
