@@ -1,9 +1,9 @@
 import $ from "logsen";
-import WebSocket from "ws";
+import { HandleSocketFunction } from "../socket/handleSocket";
 import { makeCreateServer } from "./createServer";
 
 type MakeServerOptions = {
-    handleSocket: (socket: WebSocket) => void;
+    handleSocket: HandleSocketFunction;
 };
 
 export function makeServer({ handleSocket }: MakeServerOptions): () => void {
