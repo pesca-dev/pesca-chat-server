@@ -12,21 +12,6 @@ type MakeEnhanceSocketOptions = {
     makeId(): string;
 };
 
-type SocketEventTypes = {
-    "login:request": {
-        username: string;
-        password: string;
-    };
-    "login:response": {
-        success: boolean;
-    };
-};
-
-type SocketEvent = {
-    event: string;
-    payload: any;
-};
-
 export type HandleSocketFunction = (socket: WebSocket) => void;
 
 /**
@@ -59,10 +44,10 @@ export function makeHandleSocket({ makeId, authenticate }: MakeEnhanceSocketOpti
         /**
          * Handle login requests.
          */
-        function onLoginRequest({ username = "", password = "" }: SocketEventTypes["login:request"]): void {
+        function onLoginRequest({ username = "", password = "" }: Socket.EventTypes["login:request"]): void {
             const { success, id } = authenticate({ username, password });
 
-            const data: SocketEvent = {
+            const data: Socket.Event = {
                 event: "login:response",
                 payload: {
                     success,
@@ -78,10 +63,10 @@ export function makeHandleSocket({ makeId, authenticate }: MakeEnhanceSocketOpti
          */
         function onMessage(d: WebSocket.Data) {
             try {
-                const data = JSON.parse(d.toString()) as SocketEvent;
+                const data = JSON.parse(d.toString()) as Socket.Event;
 
                 // Switch through all "allowed" events
-                switch (data.event as keyof SocketEventTypes) {
+                switch (data.event as keyof Socket.EventTypes) {
                     case "login:request":
                         onLoginRequest(data.payload);
                         break;
