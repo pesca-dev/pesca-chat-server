@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Server } from "ws";
-
-type MakeCreateServerOptions = {
-    defaultPort: number;
-};
 
 type ServerOptions = {
     port?: number;
+};
+
+type MakeCreateServerOptions = {
+    defaultPort: number;
 };
 
 /**

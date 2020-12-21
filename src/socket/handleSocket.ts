@@ -1,19 +1,40 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/unbound-method */
 import $ from "logsen";
 import WebSocket from "ws";
-
-type MakeEnhanceSocketOptions = {
-    makeId: () => string;
-};
+import { AuthenticateFunction } from "../auth/authenticate";
 
 type EnhancedWebsocket = WebSocket & {
     id: string;
 };
 
+type MakeEnhanceSocketOptions = {
+    authenticate: AuthenticateFunction;
+    makeId(): string;
+};
+
+type SocketEventTypes = {
+    "login:request": {
+        username: string;
+        password: string;
+    };
+    "login:response": {
+        success: boolean;
+    };
+};
+
+type SocketEvent = {
+    event: string;
+    payload: any;
+};
+
+export type HandleSocketFunction = (socket: WebSocket) => void;
+
 /**
  * Factory function for handling incomming sockets.
  */
-export function makeHandleSocket({ makeId }: MakeEnhanceSocketOptions): (socket: WebSocket) => void {
+export function makeHandleSocket({ makeId, authenticate }: MakeEnhanceSocketOptions): HandleSocketFunction {
     /**
      * Add extra parameter to socket.
      */
@@ -34,18 +55,44 @@ export function makeHandleSocket({ makeId }: MakeEnhanceSocketOptions): (socket:
          * Handle closing events.
          */
         function onClose(code: number, reason: string): void {
-            $.info(`Socket [${socket.id}] closed. Code ${code}: "${reason}"`);
+            $.info(`[${socket.id}] closed. Code ${code}: "${reason}"`);
+        }
+
+        /**
+         * Handle login requests.
+         */
+        function onLoginRequest({ username = "", password = "" }: SocketEventTypes["login:request"]): void {
+            const { success, id } = authenticate({ username, password });
+
+            const data: SocketEvent = {
+                event: "login:response",
+                payload: {
+                    success,
+                    id: id ?? "-1"
+                }
+            };
+            socket.send(JSON.stringify(data));
+            $.info(`${username}:${password}`);
         }
 
         /**
          * Handle incomming message events.
          */
-        function onMessage(data: WebSocket.Data) {
+        function onMessage(d: WebSocket.Data) {
             try {
-                $.info(JSON.parse(data.toString()));
+                const data = JSON.parse(d.toString()) as SocketEvent;
+
+                // Switch through all "allowed" events
+                switch (data.event as keyof SocketEventTypes) {
+                    case "login:request":
+                        onLoginRequest(data.payload);
+                        break;
+                    default:
+                        $.err(`[${socket.id}] Invalid message object: ${JSON.stringify(data)}`);
+                }
             } catch (e) {
                 // Close socket upon receiving invalid payload.
-                $.err(e);
+                $.err(`[${socket.id}] ${e}`);
                 socket.close();
             }
         }

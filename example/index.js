@@ -4,11 +4,13 @@ const ws = new WebSocket("ws://localhost:3000");
 
 ws.on("open", () => {
     ws.send(
-        // JSON.stringify({
-        //     method: "message",
-        //     payload: "Lol, funktioniert das so?"
-        // })
-            "{la"
+        JSON.stringify({
+            event: "login:request",
+            payload: {
+                username: "Louis",
+                password: ""
+            }
+        })
         );
 });
 
