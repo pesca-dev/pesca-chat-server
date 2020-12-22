@@ -9,6 +9,7 @@ export module Socket {
         };
         "login:response": {
             success: boolean;
+            id?: string;
         };
     };
 
@@ -19,14 +20,48 @@ export module Socket {
 
     type HandleSocketFunction = (socket: WebSocket) => void;
 
+    /**
+     * Type for an enhanced socket connection.
+     * Or simply: A wrapper around an existing socket.
+     * It features several other features like authentication etc.
+     */
     type EnhancedWebsocket = {
-        id: string;
         send: typeof WebSocket.prototype.send;
         on: typeof WebSocket.prototype.on;
         close: typeof WebSocket.prototype.close;
-        authenticated: boolean;
-        user: Auth.UserData | null;
+        /**
+         * Id of this socket connection.
+         * Not to confuse with the id of the user using this socket.
+         */
+        id: string;
+        /**
+         * Wrapper around `socket.send`.
+         * It produces the following call:
+         *
+         * ```
+         *  socket.send(JSON.stringfy({
+         *      event: ${event},
+         *      payload: ${payload}
+         *  }))
+         * ```
+         *
+         * @param event event to emit on the websocket
+         * @param payload payload to send
+         */
+        emit<T extends keyof Socket.EventTypes>(event: T, payload: Socket.EventTypes[T]): void;
+        /**
+         * Try to authenticate as a user of this websocket.
+         * @param data login data of the user
+         */
         login(data: Auth.Data): void;
+        /**
+         * Flag, whether a user is authenticated.
+         */
+        authenticated: boolean;
+        /**
+         * If present, user information of the authenticated user.
+         */
+        user: Auth.UserData | null;
     };
 
     type EnhanceSocketFunction = (socket: WebSocket) => EnhancedWebsocket;

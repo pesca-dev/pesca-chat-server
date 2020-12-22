@@ -30,15 +30,10 @@ export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): So
                 password
             });
 
-            const response: Socket.Event = {
-                event: "login:response",
-                payload: {
-                    success: socket.authenticated,
-                    id: socket?.user?.id ?? "-1"
-                }
-            };
-
-            socket.send(JSON.stringify(response));
+            socket.emit("login:response", {
+                success: socket.authenticated,
+                id: socket?.user?.id ?? "-1"
+            });
         }
 
         /**

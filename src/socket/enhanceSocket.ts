@@ -22,11 +22,21 @@ export function makeEnhanceSocket({ makeId, authenticate }: MakeEnhanceSocketOpt
             }
         }
 
+        function emit<T extends keyof Socket.EventTypes>(event: T, payload: Socket.EventTypes[T]): void {
+            socket.send(
+                JSON.stringify({
+                    event,
+                    payload
+                })
+            );
+        }
+
         return {
             get id() {
                 return _id;
             },
             send: socket.send.bind(socket),
+            emit,
             on: socket.on.bind(socket),
             close: socket.close.bind(socket),
             get authenticated() {
