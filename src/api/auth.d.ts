@@ -6,10 +6,15 @@ export module Auth {
 
     type Return = {
         success: boolean;
-        id?: string;
+        user?: UserData;
     };
 
     type AuthenticateFunction = (data: Auth.Data) => Auth.Return;
+
+    type UserData = {
+        id: string;
+        username: string;
+    };
 
     type Module = {
         authenticate: Auth.AuthenticateFunction;

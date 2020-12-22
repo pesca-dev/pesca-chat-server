@@ -5,7 +5,10 @@ export function makeAuthenticate(): Auth.AuthenticateFunction {
         const authed = !!username && !!password;
         return {
             success: authed,
-            id: authed ? "123" : "-1"
+            user: {
+                id: authed ? "123" : "-1",
+                username
+            }
         };
     };
 }

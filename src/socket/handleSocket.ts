@@ -1,22 +1,18 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import $ from "logsen";
 import WebSocket from "ws";
-import { Auth, Socket } from "../api";
+import { Socket } from "../api";
 
 type MakeHandleSocketOptions = {
     enhanceSocket: Socket.EnhanceSocketFunction;
-    authenticate: Auth.AuthenticateFunction;
 };
 
 /**
  * Factory function for handling incomming sockets.
  */
-export function makeHandleSocket({
-    enhanceSocket,
-    authenticate
-}: MakeHandleSocketOptions): Socket.HandleSocketFunction {
+export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): Socket.HandleSocketFunction {
     return function (s: WebSocket): void {
-        const socket = enhanceSocket(s);
+        const socket: Socket.EnhancedWebsocket = enhanceSocket(s);
 
         /**
          * Handle closing events.
@@ -29,13 +25,16 @@ export function makeHandleSocket({
          * Handle login requests.
          */
         function onLoginRequest({ username = "", password = "" }: Socket.EventTypes["login:request"]): void {
-            const { success, id } = authenticate({ username, password });
+            socket.login({
+                username,
+                password
+            });
 
             const response: Socket.Event = {
                 event: "login:response",
                 payload: {
-                    success,
-                    id: id ?? "-1"
+                    success: socket.authenticated,
+                    id: socket?.user?.id ?? "-1"
                 }
             };
 

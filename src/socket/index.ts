@@ -9,11 +9,11 @@ type MakeSocketOptions = {
 
 export function makeSocket({ authenticate }: MakeSocketOptions): Socket.Module {
     const enhanceSocket = makeEnhanceSocket({
+        authenticate,
         makeId: uuid
     });
 
     const handleSocket = makeHandleSocket({
-        authenticate,
         enhanceSocket
     });
 
