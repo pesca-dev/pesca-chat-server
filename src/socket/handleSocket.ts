@@ -3,7 +3,7 @@ import $ from "logsen";
 import WebSocket from "ws";
 import { AuthenticateFunction } from "../auth/authenticate";
 
-type EnhancedWebsocket = WebSocket & {
+export type EnhancedWebsocket = WebSocket & {
     id: string;
 };
 
@@ -47,15 +47,15 @@ export function makeHandleSocket({ makeId, authenticate }: MakeEnhanceSocketOpti
         function onLoginRequest({ username = "", password = "" }: Socket.EventTypes["login:request"]): void {
             const { success, id } = authenticate({ username, password });
 
-            const data: Socket.Event = {
+            const response: Socket.Event = {
                 event: "login:response",
                 payload: {
                     success,
                     id: id ?? "-1"
                 }
             };
-            socket.send(JSON.stringify(data));
-            $.info(`${username}:${password}`);
+
+            socket.send(JSON.stringify(response));
         }
 
         /**
