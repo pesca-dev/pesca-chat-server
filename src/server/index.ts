@@ -1,9 +1,9 @@
 import $ from "logsen";
-import { HandleSocketFunction } from "../socket/handleSocket";
+import { Socket } from "../api";
 import { makeCreateServer } from "./createServer";
 
 type MakeServerOptions = {
-    handleSocket: HandleSocketFunction;
+    handleSocket: Socket.HandleSocketFunction;
 };
 
 export function makeServer({ handleSocket }: MakeServerOptions): () => void {

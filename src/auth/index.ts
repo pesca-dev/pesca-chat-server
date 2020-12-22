@@ -1,10 +1,7 @@
-import { AuthenticateFunction, makeAuthenticate } from "./authenticate";
+import { Auth } from "../api";
+import { makeAuthenticate } from "./authenticate";
 
-type AuthModule = {
-    authenticate: AuthenticateFunction;
-};
-
-export function makeAuth(): AuthModule {
+export function makeAuth(): Auth.Module {
     const authenticate = makeAuthenticate();
 
     return Object.freeze({

@@ -1,17 +1,7 @@
-type AuthData = {
-    username: string;
-    password: string;
-};
+import { Auth } from "../api";
 
-type AuthReturn = {
-    success: boolean;
-    id?: string;
-};
-
-export type AuthenticateFunction = (data: AuthData) => AuthReturn;
-
-export function makeAuthenticate() {
-    return function ({ username = "", password = "" }: AuthData): AuthReturn {
+export function makeAuthenticate(): Auth.AuthenticateFunction {
+    return function ({ username = "", password = "" }: Auth.Data): Auth.Return {
         const authed = !!username && !!password;
         return {
             success: authed,

@@ -1,36 +1,20 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import $ from "logsen";
 import WebSocket from "ws";
-import { AuthenticateFunction } from "../auth/authenticate";
+import { Auth, Socket } from "../api";
 
-export type EnhancedWebsocket = WebSocket & {
-    id: string;
+type MakeHandleSocketOptions = {
+    enhanceSocket: Socket.EnhanceSocketFunction;
+    authenticate: Auth.AuthenticateFunction;
 };
-
-type MakeEnhanceSocketOptions = {
-    authenticate: AuthenticateFunction;
-    makeId(): string;
-};
-
-export type HandleSocketFunction = (socket: WebSocket) => void;
 
 /**
  * Factory function for handling incomming sockets.
  */
-export function makeHandleSocket({ makeId, authenticate }: MakeEnhanceSocketOptions): HandleSocketFunction {
-    /**
-     * Add extra parameter to socket.
-     */
-    function enhanceSocket(socket: WebSocket): EnhancedWebsocket {
-        const id = makeId();
-        Object.defineProperty(socket, "id", {
-            get() {
-                return id;
-            }
-        });
-        return socket as EnhancedWebsocket;
-    }
-
+export function makeHandleSocket({
+    enhanceSocket,
+    authenticate
+}: MakeHandleSocketOptions): Socket.HandleSocketFunction {
     return function (s: WebSocket): void {
         const socket = enhanceSocket(s);
 
