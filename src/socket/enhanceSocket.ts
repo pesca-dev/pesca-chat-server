@@ -31,12 +31,12 @@ export function makeEnhanceSocket({ makeId, authenticate }: MakeEnhanceSocketOpt
             );
         }
 
-        return {
+        return Object.freeze({
             get id() {
                 return _id;
             },
             send: socket.send.bind(socket),
-            emit,
+            emit: emit.bind(socket),
             on: socket.on.bind(socket),
             close: socket.close.bind(socket),
             get authenticated() {
@@ -45,7 +45,7 @@ export function makeEnhanceSocket({ makeId, authenticate }: MakeEnhanceSocketOpt
             get user() {
                 return Object.freeze(userData);
             },
-            login: authSocket
-        };
+            login: authSocket.bind(socket)
+        });
     };
 }
