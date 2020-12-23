@@ -8,6 +8,9 @@ type MakeSocketOptions = {
     createTextChannel: Channel.CreateChannelFunction<Channel.TextChannel>;
 };
 
+/**
+ * Create the socket module.
+ */
 export function makeSocket({ authenticate, createTextChannel }: MakeSocketOptions): Socket.Module {
     const textChannel = createTextChannel();
 

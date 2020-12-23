@@ -1,7 +1,9 @@
-import { Socket } from "../api";
-import { Channel } from "../api/channel";
+import { Channel, Socket } from "../api";
 
-export function makeCreateTextChannel() {
+/**
+ * Factory function for a text-channel-creating function.
+ */
+export function makeCreateTextChannel(): Channel.CreateChannelFunction<Channel.TextChannel> {
     return function (): Channel.TextChannel {
         const sockets: Map<string, Socket.EnhancedWebsocket> = new Map<string, Socket.EnhancedWebsocket>();
 
@@ -19,7 +21,10 @@ export function makeCreateTextChannel() {
             return sockets.has(id);
         }
 
-        function broadcast(msg: Socket.EventTypes["message:send"]): void {
+        /**
+         * Broadcast a message over the entire channel.
+         */
+        function broadcast(msg: Socket.EventTypes["message:receive"]): void {
             sockets.forEach(v => {
                 v.emit("message:send", msg);
             });

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import $ from "logsen";
 import WebSocket from "ws";
-import { Channel, Socket } from "../api";
+import { Auth, Channel, Socket } from "../api";
 
 type MakeHandleSocketOptions = {
     enhanceSocket: Socket.EnhanceSocketFunction;
@@ -13,13 +13,13 @@ type MakeHandleSocketOptions = {
  */
 export function makeHandleSocket({ enhanceSocket, textChannel }: MakeHandleSocketOptions): Socket.HandleSocketFunction {
     return function (s: WebSocket): void {
-        $.info(textChannel);
         const socket: Socket.EnhancedWebsocket = enhanceSocket(s);
 
         /**
          * Handle closing events.
          */
         function onClose(code: number, reason: string): void {
+            textChannel.remove(socket);
             $.info(`[${socket.id}] closed. Code ${code}: "${reason}"`);
         }
 
@@ -32,14 +32,35 @@ export function makeHandleSocket({ enhanceSocket, textChannel }: MakeHandleSocke
                 password
             });
 
+            // Join default channel upon successful login
+            if (socket.authenticated) {
+                textChannel.add(socket);
+            }
+
             socket.emit("login:response", {
                 success: socket.authenticated,
                 id: socket?.user?.id ?? "-1"
             });
         }
 
-        function onMessageSend({ author, message }: Socket.EventTypes["message:send"]): void {
-            $.info(author, message);
+        /**
+         * Handle incomming `message:send` events.
+         */
+        function onMessageSend({ message }: Socket.EventTypes["message:send"]): void {
+            // Check for authentication
+            if (!socket.authenticated || !textChannel.has(socket)) {
+                socket.close();
+            }
+
+            // Construct return object
+            const msg: Socket.EventTypes["message:receive"] = {
+                author: socket.user as Auth.UserData,
+                message: {
+                    content: message.content,
+                    date: Date.now()
+                }
+            };
+            textChannel.broadcast(msg);
         }
 
         /**
