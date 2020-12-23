@@ -11,6 +11,24 @@ export module Socket {
             success: boolean;
             id?: string;
         };
+        /**
+         * Client -> Server
+         */
+        "message:send": {
+            message: {
+                content: string;
+            };
+        };
+        /**
+         * Server -> Client
+         */
+        "message:receive": {
+            author: Auth.UserData;
+            message: {
+                content: string;
+                date: number;
+            };
+        };
     };
 
     type Event = {

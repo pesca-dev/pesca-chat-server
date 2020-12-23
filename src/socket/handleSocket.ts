@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import $ from "logsen";
 import WebSocket from "ws";
-import { Socket } from "../api";
+import { Auth, Channel, Socket } from "../api";
 
 type MakeHandleSocketOptions = {
     enhanceSocket: Socket.EnhanceSocketFunction;
+    textChannel: Channel.TextChannel;
 };
 
 /**
  * Factory function for handling incomming sockets.
  */
-export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): Socket.HandleSocketFunction {
+export function makeHandleSocket({ enhanceSocket, textChannel }: MakeHandleSocketOptions): Socket.HandleSocketFunction {
     return function (s: WebSocket): void {
         const socket: Socket.EnhancedWebsocket = enhanceSocket(s);
 
@@ -18,6 +19,7 @@ export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): So
          * Handle closing events.
          */
         function onClose(code: number, reason: string): void {
+            textChannel.remove(socket);
             $.info(`[${socket.id}] closed. Code ${code}: "${reason}"`);
         }
 
@@ -30,10 +32,35 @@ export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): So
                 password
             });
 
+            // Join default channel upon successful login
+            if (socket.authenticated) {
+                textChannel.add(socket);
+            }
+
             socket.emit("login:response", {
                 success: socket.authenticated,
                 id: socket?.user?.id ?? "-1"
             });
+        }
+
+        /**
+         * Handle incomming `message:send` events.
+         */
+        function onMessageSend({ message }: Socket.EventTypes["message:send"]): void {
+            // Check for authentication
+            if (!socket.authenticated || !textChannel.has(socket)) {
+                socket.close();
+            }
+
+            // Construct return object
+            const msg: Socket.EventTypes["message:receive"] = {
+                author: socket.user as Auth.UserData,
+                message: {
+                    content: message.content,
+                    date: Date.now()
+                }
+            };
+            textChannel.broadcast(msg);
         }
 
         /**
@@ -48,6 +75,11 @@ export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): So
                     case "login:request":
                         onLoginRequest(data.payload);
                         break;
+
+                    case "message:send":
+                        onMessageSend(data.payload);
+                        break;
+
                     default:
                         $.err(`[${socket.id}] Invalid message object: ${JSON.stringify(data)}`);
                 }

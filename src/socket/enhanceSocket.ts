@@ -40,7 +40,7 @@ export function makeEnhanceSocket({ makeId, authenticate }: MakeEnhanceSocketOpt
             on: socket.on.bind(socket),
             close: socket.close.bind(socket),
             get authenticated() {
-                return !userData;
+                return !!userData;
             },
             get user() {
                 return Object.freeze(userData);
