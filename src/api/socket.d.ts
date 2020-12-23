@@ -11,6 +11,13 @@ export module Socket {
             success: boolean;
             id?: string;
         };
+        "message:send": {
+            author: Auth.UserData;
+            message: {
+                content: string;
+                date?: number;
+            };
+        };
     };
 
     type Event = {

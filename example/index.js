@@ -5,7 +5,7 @@ const ws = new WebSocket("ws://localhost:3000");
 ws.on("open", () => {
     ws.send(
         JSON.stringify({
-            event: "login:request",
+            event: "message:send",
             payload: {
                 username: "Louis",
                 password: ""

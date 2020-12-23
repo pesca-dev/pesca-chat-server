@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import $ from "logsen";
 import WebSocket from "ws";
-import { Socket } from "../api";
+import { Channel, Socket } from "../api";
 
 type MakeHandleSocketOptions = {
     enhanceSocket: Socket.EnhanceSocketFunction;
+    textChannel: Channel.TextChannel;
 };
 
 /**
  * Factory function for handling incomming sockets.
  */
-export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): Socket.HandleSocketFunction {
+export function makeHandleSocket({ enhanceSocket, textChannel }: MakeHandleSocketOptions): Socket.HandleSocketFunction {
     return function (s: WebSocket): void {
+        $.info(textChannel);
         const socket: Socket.EnhancedWebsocket = enhanceSocket(s);
 
         /**
@@ -36,6 +38,10 @@ export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): So
             });
         }
 
+        function onMessageSend({ author, message }: Socket.EventTypes["message:send"]): void {
+            $.info(author, message);
+        }
+
         /**
          * Handle incomming message events.
          */
@@ -48,6 +54,11 @@ export function makeHandleSocket({ enhanceSocket }: MakeHandleSocketOptions): So
                     case "login:request":
                         onLoginRequest(data.payload);
                         break;
+
+                    case "message:send":
+                        onMessageSend(data.payload);
+                        break;
+
                     default:
                         $.err(`[${socket.id}] Invalid message object: ${JSON.stringify(data)}`);
                 }
