@@ -1,12 +1,12 @@
 import { v4 as makeId } from "uuid";
 import { makeServer } from "./server";
-import { makeSocket } from "./socket";
-import { makeAuth } from "./auth";
+import { makeSocketModule } from "./socket";
+import { makeAuthModule } from "./auth";
 import { makeCreateTextChannel } from "./channel/textChannel";
 
-const { authenticate } = makeAuth();
+const { authenticate } = makeAuthModule();
 const createTextChannel = makeCreateTextChannel({ makeId });
 
-const { handleSocket } = makeSocket({ authenticate, createTextChannel, makeId });
+const { handleSocket } = makeSocketModule({ authenticate, createTextChannel, makeId });
 
 makeServer({ handleSocket })();

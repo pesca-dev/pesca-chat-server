@@ -11,7 +11,7 @@ type MakeSocketOptions = {
 /**
  * Create the socket module.
  */
-export function makeSocket({ authenticate, createTextChannel, makeId }: MakeSocketOptions): Socket.Module {
+export function makeSocketModule({ authenticate, createTextChannel, makeId }: MakeSocketOptions): Socket.Module {
     const textChannel = createTextChannel();
 
     const enhanceSocket = makeEnhanceSocket({

@@ -8,7 +8,7 @@ type MakeChannelOptions = {
 /**
  * Factory function for the channel module.
  */
-export function makeChannel({ makeId }: MakeChannelOptions): Channel.Module {
+export function makeChannelModule({ makeId }: MakeChannelOptions): Channel.Module {
     const channels: Map<string, Channel.TextChannel> = new Map<string, Channel.TextChannel>();
     const _createTextChannel = makeCreateTextChannel({ makeId });
 
