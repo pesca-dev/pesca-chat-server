@@ -16,12 +16,12 @@ export function makeAuthenticate(): Auth.AuthenticateFunction {
         const user = users.find(u => u.username === username && u.password === password);
 
         const authed = !!user;
-        return {
+        return Object.freeze({
             success: authed,
             user: {
                 id: authed ? "123" : "-1",
                 username
             }
-        };
+        });
     };
 }

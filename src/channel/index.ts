@@ -27,8 +27,8 @@ export function makeChannel({ makeId }: MakeChannelOptions): Channel.Module {
         }
     }
 
-    return {
+    return Object.freeze({
         createTextChannel,
         deleteChannel
-    };
+    });
 }
