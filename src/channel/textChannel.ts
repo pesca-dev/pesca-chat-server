@@ -1,10 +1,17 @@
 import { Channel, Socket } from "../api";
 
+type MakeCreateTextChannelOptions = {
+    makeId(): string;
+};
+
 /**
  * Factory function for a text-channel-creating function.
  */
-export function makeCreateTextChannel(): Channel.CreateChannelFunction<Channel.TextChannel> {
+export function makeCreateTextChannel({
+    makeId
+}: MakeCreateTextChannelOptions): Channel.CreateChannelFunction<Channel.TextChannel> {
     return function (): Channel.TextChannel {
+        const channelId = makeId();
         const sockets: Map<string, Socket.EnhancedWebsocket> = new Map<string, Socket.EnhancedWebsocket>();
 
         function add(socket: Socket.EnhancedWebsocket): void {
@@ -30,14 +37,26 @@ export function makeCreateTextChannel(): Channel.CreateChannelFunction<Channel.T
             });
         }
 
-        return {
+        /**
+         * Savely delete this channel.
+         */
+        function saveDelete(): void {
+            // Remove all sockets from this channel
+            sockets.forEach((_, k) => sockets.delete(k));
+        }
+
+        return Object.freeze({
+            get id() {
+                return channelId;
+            },
             get users() {
                 return Object.freeze([...sockets.values()]);
             },
             add,
             remove,
             has,
-            broadcast
-        };
+            broadcast,
+            saveDelete
+        });
     };
 }
