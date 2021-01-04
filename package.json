@@ -21,7 +21,6 @@
         "eslint-plugin-import": "^2.22.0",
         "eslint-plugin-jsdoc": "^30.4.0",
         "rimraf": "^2.7.1",
-        "socket-chat-protocol": "git+https://git.bre4k3r.de/dev-bre4k3r/socket-chat/socket-chat-protocol.git",
         "typescript": "^3.8.3"
     },
     "dependencies": {
