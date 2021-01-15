@@ -27,14 +27,14 @@ export module Socket {
          */
         "channel:join": {
             channel: string;
-            user: string;
+            user: Auth.UserData;
         };
         /**
          * Event for a user leaving a channel.
          */
         "channel:leave": {
             channel: string;
-            user: string;
+            user: Auth.UserData;
         };
     };
 

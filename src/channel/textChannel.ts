@@ -1,4 +1,4 @@
-import { Channel, Socket } from "../api";
+import { Auth, Channel, Socket } from "../api";
 
 type MakeCreateTextChannelOptions = {
     makeId(): string;
@@ -20,7 +20,7 @@ export function makeCreateTextChannel({
             sockets.forEach(v => {
                 v.emit("channel:join", {
                     channel: channelId,
-                    user: socket.user?.id as string
+                    user: socket.user as Auth.UserData
                 });
             });
         }
@@ -33,7 +33,7 @@ export function makeCreateTextChannel({
                 sockets.forEach(v => {
                     v.emit("channel:leave", {
                         channel: channelId,
-                        user: s?.user?.id as string
+                        user: s?.user as Auth.UserData
                     });
                 });
             }
