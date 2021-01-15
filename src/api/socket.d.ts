@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import { Auth } from "./auth";
+import { Channel } from "./channel";
 
 export module Socket {
     type EventTypes = {
@@ -15,19 +16,25 @@ export module Socket {
          * Client -> Server
          */
         "message:send": {
+            author?: Auth.UserData;
             message: {
                 content: string;
+                date?: number;
             };
         };
         /**
-         * Server -> Client
+         * Event for a user joining a channel.
          */
-        "message:receive": {
-            author: Auth.UserData;
-            message: {
-                content: string;
-                date: number;
-            };
+        "channel:join": {
+            channel: string;
+            user: string;
+        };
+        /**
+         * Event for a user leaving a channel.
+         */
+        "channel:leave": {
+            channel: string;
+            user: string;
         };
     };
 
@@ -80,6 +87,7 @@ export module Socket {
          * If present, user information of the authenticated user.
          */
         user: Auth.UserData | null;
+        join(channel: Channel.TextChannel): void;
     };
 
     type EnhanceSocketFunction = (socket: WebSocket) => EnhancedWebsocket;

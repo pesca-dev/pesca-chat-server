@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { Auth, Socket } from "../api";
+import { Auth, Channel, Socket } from "../api";
 
 type MakeEnhanceSocketOptions = {
     authenticate: Auth.AuthenticateFunction;
@@ -31,7 +31,11 @@ export function makeEnhanceSocket({ makeId, authenticate }: MakeEnhanceSocketOpt
             );
         }
 
-        return Object.freeze({
+        function join(channel: Channel.TextChannel) {
+            channel.add(enhancedSocket);
+        }
+
+        const enhancedSocket: Socket.EnhancedWebsocket = {
             get id() {
                 return _id;
             },
@@ -45,7 +49,10 @@ export function makeEnhanceSocket({ makeId, authenticate }: MakeEnhanceSocketOpt
             get user() {
                 return Object.freeze(userData);
             },
-            login: authSocket.bind(socket)
-        });
+            login: authSocket.bind(socket),
+            join
+        };
+
+        return Object.freeze(enhancedSocket);
     };
 }

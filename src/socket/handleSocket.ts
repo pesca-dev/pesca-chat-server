@@ -32,15 +32,15 @@ export function makeHandleSocket({ enhanceSocket, textChannel }: MakeHandleSocke
                 password
             });
 
-            // Join default channel upon successful login
-            if (socket.authenticated) {
-                textChannel.add(socket);
-            }
-
             socket.emit("login:response", {
                 success: socket.authenticated,
                 id: socket?.user?.id ?? "-1"
             });
+
+            // Join default channel upon successful login
+            if (socket.authenticated) {
+                socket.join(textChannel);
+            }
         }
 
         /**
@@ -53,7 +53,7 @@ export function makeHandleSocket({ enhanceSocket, textChannel }: MakeHandleSocke
             }
 
             // Construct return object
-            const msg: Socket.EventTypes["message:receive"] = {
+            const msg: Socket.EventTypes["message:send"] = {
                 author: socket.user as Auth.UserData,
                 message: {
                     content: message.content,

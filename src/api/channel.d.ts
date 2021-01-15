@@ -10,7 +10,7 @@ export module Channel {
         add(socket: Socket.EnhancedWebsocket): void;
         remove(socket: Socket.EnhancedWebsocket | string): void;
         has(socket: Socket.EnhancedWebsocket | string): boolean;
-        broadcast(msg: Socket.EventTypes["message:receive"]): void;
+        broadcast(msg: Socket.EventTypes["message:send"]): void;
         saveDelete(): void;
     };
 

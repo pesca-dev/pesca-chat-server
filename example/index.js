@@ -7,17 +7,17 @@ ws.on("open", () => {
         JSON.stringify({
             event: "login:request",
             payload: {
-                username: "Louis",
+                username: "lome",
                 password: "test"
             }
         })
     );
 });
 
-ws.on("message", (data) => {
+ws.on("message", data => {
     const d = JSON.parse(data);
     console.log(d);
-    switch(d.event) {
+    switch (d.event) {
         case "login:response":
             ws.send(
                 JSON.stringify({
@@ -28,7 +28,10 @@ ws.on("message", (data) => {
                         }
                     }
                 })
-            )
+            );
+            break;
+        case "message:send":
+            console.log(`${d.payload.author.username}: ${d.payload.message.content}`);
             break;
     }
-})
+});
