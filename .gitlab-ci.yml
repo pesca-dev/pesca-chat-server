@@ -6,7 +6,7 @@ stages:
 build:
     stage: build
     script:
-        - scripts/build.sh
+        - bash ./scripts/build.sh
     artifacts:
         paths:
             - bin/
