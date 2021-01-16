@@ -9,4 +9,4 @@ build:
         - bash ./scripts/build.sh
     artifacts:
         paths:
-            - bin/
+            - bin/*
