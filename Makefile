@@ -1,8 +1,5 @@
 # note: call scripts from /scripts
-all: 
+all: build
 
 build: 
 	./scripts/build.sh
-
-run: 
-	./bin/pesca-chat-server.exe
