@@ -38,7 +38,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Server does magic
+// Server does magic and more :^)
 func Server() {
 	http.HandleFunc("/", handleRoot)
 	log.Fatal(http.ListenAndServe(addr, nil))
