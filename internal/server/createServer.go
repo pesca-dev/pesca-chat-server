@@ -12,13 +12,8 @@ type server struct {
 	Start func()
 }
 
-// MakeCreateServerOptions .
-type MakeCreateServerOptions struct {
-	addr string
-}
-
 // makeCreateServer is a factory function for the createServer function.
-func makeCreateServer(opts MakeCreateServerOptions) func() server {
+func makeCreateServer(addr string) func() server {
 	var upgrader = websocket.Upgrader{}
 
 	handleRoot := func(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +47,7 @@ func makeCreateServer(opts MakeCreateServerOptions) func() server {
 		http.HandleFunc("/", handleRoot)
 
 		Start := func() {
-			log.Fatal(http.ListenAndServe(opts.addr, nil))
+			log.Fatal(http.ListenAndServe(addr, nil))
 		}
 
 		return server{
