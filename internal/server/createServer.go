@@ -17,7 +17,7 @@ func (s *server) Start() {
 }
 
 // makeCreateServer is a factory function for the createServer function.
-func makeCreateServer(addr string) func() server {
+func makeCreateServer(addr string, handleSocket func(c *websocket.Conn)) func() server {
 	var upgrader = websocket.Upgrader{}
 
 	handleRoot := func(w http.ResponseWriter, r *http.Request) {
@@ -28,23 +28,7 @@ func makeCreateServer(addr string) func() server {
 			log.Print("An error during upgrading: ", err)
 			return
 		}
-
-		for {
-			messageType, message, err := c.ReadMessage()
-
-			if err != nil {
-				log.Println("Error during reading from websocket: ", err)
-				break
-			}
-
-			log.Printf("Received: %s", message)
-			err = c.WriteMessage(messageType, message)
-
-			if err != nil {
-				log.Println("Error during writing: ", err)
-				break
-			}
-		}
+		handleSocket(c)
 	}
 
 	http.HandleFunc("/", handleRoot)
