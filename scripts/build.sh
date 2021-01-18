@@ -84,4 +84,4 @@ IFS=$OLDIFS
 # Done!
 echo
 echo "==> Results:"
-ls -hl bin/
+ls -hlR bin/
