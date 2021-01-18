@@ -9,7 +9,11 @@ import (
 
 // server is the general struct for containing the server.
 type server struct {
-	Start func()
+	addr string
+}
+
+func (s *server) Start() {
+	log.Fatal(http.ListenAndServe(s.addr, nil))
 }
 
 // makeCreateServer is a factory function for the createServer function.
@@ -43,15 +47,11 @@ func makeCreateServer(addr string) func() server {
 		}
 	}
 
+	http.HandleFunc("/", handleRoot)
+
 	return func() server {
-		http.HandleFunc("/", handleRoot)
-
-		Start := func() {
-			log.Fatal(http.ListenAndServe(addr, nil))
-		}
-
 		return server{
-			Start,
+			addr,
 		}
 	}
 }
