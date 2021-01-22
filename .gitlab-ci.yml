@@ -4,6 +4,8 @@ stages:
     - build
 
 build:
+    variables:
+        PESCA_PROD: 1
     stage: build
     script:
         - bash ./scripts/build.sh
