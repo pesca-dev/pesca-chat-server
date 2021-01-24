@@ -9,15 +9,18 @@ import (
 
 // server is the general struct for containing the server.
 type server struct {
-	addr string
+	srv *http.Server
 }
 
 func (s *server) Start() {
-	log.Fatal(http.ListenAndServe(s.addr, nil))
+	err := s.srv.ListenAndServe()
+	if err != nil {
+		log.Fatalf("Error during listening: %v", err)
+	}
 }
 
 // makeCreateServer is a factory function for the createServer function.
-func makeCreateServer(addr string, handleSocket func(c *websocket.Conn)) func() server {
+func makeCreateServer(addr string, handleSocket func(c *websocket.Conn)) func() *server {
 	var upgrader = websocket.Upgrader{}
 
 	handleRoot := func(w http.ResponseWriter, r *http.Request) {
@@ -31,11 +34,18 @@ func makeCreateServer(addr string, handleSocket func(c *websocket.Conn)) func() 
 		handleSocket(c)
 	}
 
-	http.HandleFunc("/", handleRoot)
+	return func() *server {
 
-	return func() server {
-		return server{
-			addr,
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", handleRoot)
+
+		srv := &http.Server{
+			Addr:    addr,
+			Handler: mux,
+		}
+
+		return &server{
+			srv,
 		}
 	}
 }

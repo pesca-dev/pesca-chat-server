@@ -18,7 +18,7 @@ func MakeHandleSocket() func(c *websocket.Conn) {
 				break
 			}
 
-			log.Printf("Received: %s", message)
+			log.Printf("Received: [%d] %s", messageType, message)
 			err = c.WriteMessage(messageType, message)
 
 			if err != nil {
