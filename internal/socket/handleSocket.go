@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -9,23 +10,25 @@ import (
 // MakeHandleSocket is a factory function for handleSocket, which handles incomming socket connections.
 func MakeHandleSocket(enhanceSocket func(c *websocket.Conn) PescaSocket) func(c *websocket.Conn) {
 	return func(c *websocket.Conn) {
-		sock := enhanceSocket(c)
-		for {
-			messageType, message, err := c.ReadMessage()
+		socket := enhanceSocket(c)
 
+		for {
+			_, m, err := c.ReadMessage()
 			if err != nil {
 				log.Println("Error during reading from websocket: ", err)
-				break
+				return
 			}
 
-			log.Printf("Received: [%d] %s", messageType, message)
-			sock.send("[1, 2, 3]")
-			// err = c.WriteMessage(messageType, message)
+			// Decode initial baseEvent
+			var baseEvent BaseEvent
+			err = json.Unmarshal(m, &baseEvent)
 
 			if err != nil {
-				log.Println("Error during writing: ", err)
-				break
+				log.Printf("error: %v", err)
+				return
 			}
+
+			socket.handle(baseEvent.Event, m)
 		}
 	}
 }
