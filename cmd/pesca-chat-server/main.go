@@ -7,7 +7,8 @@ import (
 
 func main() {
 
-	handleSocket := socket.MakeHandleSocket()
+	enhanceSocket := socket.MakeEnhanceSocket()
+	handleSocket := socket.MakeHandleSocket(enhanceSocket)
 	server := server.MakeServer(handleSocket)
 	server()
 }

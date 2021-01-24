@@ -7,9 +7,9 @@ import (
 )
 
 // MakeHandleSocket is a factory function for handleSocket, which handles incomming socket connections.
-func MakeHandleSocket() func(c *websocket.Conn) {
+func MakeHandleSocket(enhanceSocket func(c *websocket.Conn) PescaSocket) func(c *websocket.Conn) {
 	return func(c *websocket.Conn) {
-
+		sock := enhanceSocket(c)
 		for {
 			messageType, message, err := c.ReadMessage()
 
@@ -19,7 +19,8 @@ func MakeHandleSocket() func(c *websocket.Conn) {
 			}
 
 			log.Printf("Received: [%d] %s", messageType, message)
-			err = c.WriteMessage(messageType, message)
+			sock.send("[1, 2, 3]")
+			// err = c.WriteMessage(messageType, message)
 
 			if err != nil {
 				log.Println("Error during writing: ", err)
