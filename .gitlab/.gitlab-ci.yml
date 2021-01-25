@@ -1,7 +1,13 @@
 image: golang:latest
 
 stages:
+    - test
     - build
+
+test:
+    stage: test
+    script:
+        - go test ./... -race
 
 build:
     variables:

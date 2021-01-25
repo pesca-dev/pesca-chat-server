@@ -1,13 +1,9 @@
 package server
 
-import (
-	"github.com/gorilla/websocket"
-)
-
 // MakeServer creates the server module
-func MakeServer(handleSocket func(c *websocket.Conn)) func() {
+func MakeServer() func() {
 	return func() {
-		createServer := makeCreateServer(":8080", handleSocket)
+		createServer := makeCreateServer(":8080")
 		server := createServer()
 		server.Start()
 	}

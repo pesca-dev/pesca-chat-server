@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"git.pesca.dev/pesca-dev/pesca-chat-server/internal/socket"
 	"github.com/gorilla/websocket"
 )
 
@@ -20,18 +21,21 @@ func (s *server) Start() {
 }
 
 // makeCreateServer is a factory function for the createServer function.
-func makeCreateServer(addr string, handleSocket func(c *websocket.Conn)) func() *server {
+func makeCreateServer(addr string) func() *server {
 	var upgrader = websocket.Upgrader{}
 
 	handleRoot := func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
-		defer c.Close()
 
 		if err != nil {
 			log.Print("An error during upgrading: ", err)
+			c.Close()
 			return
 		}
-		handleSocket(c)
+
+		socket := socket.EnhanceSocket(c)
+		defer socket.Close(-1, "Socket closed manually")
+		socket.Start()
 	}
 
 	return func() *server {
