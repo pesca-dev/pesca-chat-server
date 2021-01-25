@@ -23,8 +23,8 @@ type LoginResponse struct {
 
 // LoginResponsePayload .
 type LoginResponsePayload struct {
-	Success bool `json:"success"`
-	ID      int  `json:"id"`
+	Success bool   `json:"success"`
+	ID      string `json:"id"`
 }
 
 // ErrorMessagePayload .

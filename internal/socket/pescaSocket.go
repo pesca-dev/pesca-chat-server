@@ -15,5 +15,5 @@ type PescaSocket interface {
 	// Send an error over the socket and close it.
 	err(msg string)
 	// Get the of the socket.
-	getID() int
+	getID() string
 }

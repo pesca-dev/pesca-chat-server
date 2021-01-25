@@ -9,13 +9,13 @@ import (
 
 type pescaSocketImpl struct {
 	c        *websocket.Conn
-	id       int
+	id       string
 	loggedIn bool
 	userData userData
 }
 
 type userData struct {
-	ID       int
+	ID       string
 	username string
 }
 
@@ -25,7 +25,7 @@ func (s *pescaSocketImpl) send(msg string) {
 
 func (s *pescaSocketImpl) login(username string, password string) error {
 	s.loggedIn = true
-	id := 1
+	id := "1"
 
 	pl := LoginResponsePayload{
 		Success: s.loggedIn,
@@ -94,7 +94,7 @@ func (s *pescaSocketImpl) err(msg string) {
 	s.emit("error", pl)
 }
 
-func (s *pescaSocketImpl) getID() int {
+func (s *pescaSocketImpl) getID() string {
 	return s.id
 }
 
@@ -102,7 +102,7 @@ func (s *pescaSocketImpl) getID() int {
 func MakeEnhanceSocket() func(c *websocket.Conn) PescaSocket {
 	return func(c *websocket.Conn) PescaSocket {
 		return &pescaSocketImpl{
-			id:       -1,
+			id:       "-1",
 			c:        c,
 			loggedIn: false,
 		}
