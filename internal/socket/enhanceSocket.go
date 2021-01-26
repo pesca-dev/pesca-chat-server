@@ -38,15 +38,18 @@ func (s *PescaSocket) GetConn() *websocket.Conn {
 // Start starts . :))
 func (s *PescaSocket) Start() {
 	for {
-		_, m, err := s.c.ReadMessage()
+		t, m, err := s.c.ReadMessage()
 		if err != nil {
 			log.Println("Error during reading from websocket: ", err)
 			return
 		}
-		if err == nil {
-			log.Printf("%v", m)
-		}
+		s.emit(t, m)
 	}
+}
+
+// Emit a message on the socket.
+func (s *PescaSocket) emit(t int, m []byte) {
+	// TODO lome: implement me
 }
 
 // EnhanceSocket returns a wrapper around a classic websocket connection.
