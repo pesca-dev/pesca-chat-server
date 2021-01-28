@@ -45,7 +45,7 @@ func (s *PescaSocket) Close(code int, text string) {
 // Bind all relevant things for PescaSocket.
 func (s *PescaSocket) Bind() {
 	s.c.SetCloseHandler(s.onClose)
-	s.on("login:request", s.onLogin)
+	s.on("login:request", s.onLoginRequest)
 }
 
 // Handle the on close event.
@@ -104,7 +104,7 @@ func (s *PescaSocket) emit(event string, m []byte) {
 }
 
 // Handle login event
-func (s *PescaSocket) onLogin(m []byte) {
+func (s *PescaSocket) onLoginRequest(m []byte) {
 	var req LoginRequest
 	if err := json.Unmarshal(m, &req); err != nil {
 		s.Send("error", ErrorMessagePayload{
