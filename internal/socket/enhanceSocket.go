@@ -12,6 +12,8 @@ import (
 type PescaSocket struct {
 	c  *websocket.Conn
 	id string
+	// TODO lome: use slice
+	handlers map[string]func(m []byte)
 }
 
 // Send an event + payload message of the websocket.
@@ -47,6 +49,7 @@ func (s *PescaSocket) Bind() {
 
 // Handle the on close event.
 func (s *PescaSocket) onClose(code int, text string) error {
+	// TODO lome: Add logic that needs to be executed upon closing of channel.
 	return nil
 }
 
@@ -63,13 +66,40 @@ func (s *PescaSocket) Start() {
 			log.Println("Error during reading from websocket: ", err)
 			return
 		}
-		s.emit(t, m)
+		s.decode(t, m)
 	}
 }
 
+// Decode the payload that arrived over the websocket.
+func (s *PescaSocket) decode(t int, m []byte) {
+	switch t {
+	case websocket.TextMessage:
+		s.handleTextMessage(t, m)
+	}
+}
+
+// Handle an incomming text message.
+func (s *PescaSocket) handleTextMessage(t int, m []byte) {
+	var baseEvent BaseEvent
+	if err := json.Unmarshal(m, &baseEvent); err != nil {
+		log.Printf("json.Unmarshal: %v", err)
+		s.Close(-1, err.Error())
+		return
+	}
+	s.emit(baseEvent.Event, m)
+}
+
+// Register a handler for a specific event.
+func (s *PescaSocket) on(event string, fn func(m []byte)) {
+	// TODO lome: channels?
+	s.handlers[event] = fn
+}
+
 // Emit a message on the socket.
-func (s *PescaSocket) emit(t int, m []byte) {
-	// TODO lome: implement me
+func (s *PescaSocket) emit(event string, m []byte) {
+	if s.handlers[event] != nil {
+		s.handlers[event](m)
+	}
 }
 
 // EnhanceSocket returns a wrapper around a classic websocket connection.
