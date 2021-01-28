@@ -45,6 +45,7 @@ func (s *PescaSocket) Close(code int, text string) {
 // Bind all relevant things for PescaSocket.
 func (s *PescaSocket) Bind() {
 	s.c.SetCloseHandler(s.onClose)
+	s.on("login:request", s.onLogin)
 }
 
 // Handle the on close event.
@@ -100,6 +101,19 @@ func (s *PescaSocket) emit(event string, m []byte) {
 	if s.handlers[event] != nil {
 		s.handlers[event](m)
 	}
+}
+
+// Handle login event
+func (s *PescaSocket) onLogin(m []byte) {
+	var req LoginRequest
+	if err := json.Unmarshal(m, &req); err != nil {
+		s.Send("error", ErrorMessagePayload{
+			Code:    400,
+			Message: "Invalid login request",
+		})
+		return
+	}
+	// TODO lome: Handle login (maybe via s.login)
 }
 
 // EnhanceSocket returns a wrapper around a classic websocket connection.
