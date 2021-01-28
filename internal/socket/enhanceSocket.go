@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/google/uuid"
@@ -13,9 +14,28 @@ type PescaSocket struct {
 	id string
 }
 
-// Close the socket.
+// Send an event + payload message of the websocket.
+func (s *PescaSocket) Send(event string, payload interface{}) {
+	message := BaseEvent{
+		Event:   event,
+		Payload: payload,
+	}
+	buff, err := json.Marshal(message)
+	if err != nil {
+		log.Printf("json.Marshal: %v", err)
+	}
+	if err = s.c.WriteMessage(websocket.TextMessage, buff); err != nil {
+		log.Printf("socket.WriteMessage: %v", err)
+	}
+}
+
+// Close the socket and send error message to user.
 func (s *PescaSocket) Close(code int, text string) {
-	// TODO lome: send message to user
+	payload := ErrorMessagePayload{
+		Code:    code,
+		Message: text,
+	}
+	s.Send("error", payload)
 	s.c.Close()
 	s.onClose(code, text)
 }

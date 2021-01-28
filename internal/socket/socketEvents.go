@@ -29,5 +29,6 @@ type LoginResponsePayload struct {
 
 // ErrorMessagePayload .
 type ErrorMessagePayload struct {
+	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
