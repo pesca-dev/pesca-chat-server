@@ -27,6 +27,16 @@ type LoginResponsePayload struct {
 	ID      string `json:"id"`
 }
 
+// MessageReceive .
+type MessageReceive struct {
+	Event   string `json:"event"`
+	Payload struct {
+		Message struct {
+			Content string `json:"content"`
+		} `json:"message"`
+	} `json:"payload"`
+}
+
 // ErrorMessagePayload .
 type ErrorMessagePayload struct {
 	Code    int    `json:"code"`
