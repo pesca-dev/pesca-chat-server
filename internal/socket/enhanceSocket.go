@@ -3,6 +3,7 @@ package socket
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -84,7 +85,7 @@ func (s *PescaSocket) handleTextMessage(t int, m []byte) {
 	var baseEvent BaseEvent
 	if err := json.Unmarshal(m, &baseEvent); err != nil {
 		log.Printf("json.Unmarshal: %v", err)
-		s.Close(-1, err.Error())
+		s.Close(http.StatusBadRequest, err.Error())
 		return
 	}
 	s.emit(baseEvent.Event, m)
@@ -108,7 +109,7 @@ func (s *PescaSocket) onLoginRequest(m []byte) {
 	var req LoginRequest
 	if err := json.Unmarshal(m, &req); err != nil {
 		s.Send("error", ErrorMessagePayload{
-			Code:    400,
+			Code:    http.StatusBadRequest,
 			Message: "Invalid login request",
 		})
 		return
