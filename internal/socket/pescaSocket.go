@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
+	"git.pesca.dev/pesca-dev/pesca-chat-server/internal/events"
+	"git.pesca.dev/pesca-dev/pesca-chat-server/internal/typings"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -16,6 +19,7 @@ type PescaSocket struct {
 	// TODO lome: use slice
 	handlers map[string]func(m []byte)
 	user     userData
+	channel  typings.GeneralChannel
 }
 
 type userData struct {
@@ -23,9 +27,14 @@ type userData struct {
 	ID       string
 }
 
+// GetID returns the id of this PescaSocket.
+func (s PescaSocket) GetID() string {
+	return s.id
+}
+
 // Send an event + payload message of the websocket.
 func (s *PescaSocket) Send(event string, payload interface{}) {
-	message := BaseEvent{
+	message := events.BaseEvent{
 		Event:   event,
 		Payload: payload,
 	}
@@ -40,7 +49,7 @@ func (s *PescaSocket) Send(event string, payload interface{}) {
 
 // Close the socket and send error message to user.
 func (s *PescaSocket) Close(code int, text string) {
-	payload := ErrorMessagePayload{
+	payload := events.ErrorMessagePayload{
 		Code:    code,
 		Message: text,
 	}
@@ -89,7 +98,7 @@ func (s *PescaSocket) decode(t int, m []byte) {
 
 // Handle an incomming text message.
 func (s *PescaSocket) handleTextMessage(t int, m []byte) {
-	var baseEvent BaseEvent
+	var baseEvent events.BaseEvent
 	if err := json.Unmarshal(m, &baseEvent); err != nil {
 		log.Printf("json.Unmarshal: %v", err)
 		s.Close(http.StatusBadRequest, err.Error())
@@ -114,9 +123,9 @@ func (s *PescaSocket) emit(event string, m []byte) {
 
 // Handle login event.
 func (s *PescaSocket) onLoginRequest(m []byte) {
-	var req LoginRequest
+	var req events.LoginRequest
 	if err := json.Unmarshal(m, &req); err != nil {
-		s.Send("error", ErrorMessagePayload{
+		s.Send("error", events.ErrorMessagePayload{
 			Code:    http.StatusBadRequest,
 			Message: "Invalid login request",
 		})
@@ -127,7 +136,7 @@ func (s *PescaSocket) onLoginRequest(m []byte) {
 	if suc {
 		id = s.user.ID
 	}
-	s.Send("login:response", LoginResponsePayload{
+	s.Send("login:response", events.LoginResponsePayload{
 		Success: suc,
 		ID:      id,
 	})
@@ -149,12 +158,29 @@ func (s *PescaSocket) IsLoggedIn() bool {
 
 // Handle message event.
 func (s *PescaSocket) onMessageSend(m []byte) {
-	var req MessageReceive
+	if !s.IsLoggedIn() {
+		return
+	}
+	var req events.MessageReceive
 	if err := json.Unmarshal(m, &req); err != nil {
-		s.Send("error", ErrorMessagePayload{
+		s.Send("error", events.ErrorMessagePayload{
 			Code:    http.StatusBadRequest,
 			Message: "Invalid message send",
 		})
 		return
 	}
+	log.Printf("[%s] %s: \"%s\"", s.id, s.user.username, req.Payload.Message.Content)
+
+	// Create message object.
+	resp := events.MessageResponsePayload{
+		Author: events.MessageAuthor{
+			Username: s.user.username,
+			ID:       s.user.ID,
+		},
+		Message: events.MessageObject{
+			Content: req.Payload.Message.Content,
+			Date:    time.Now().Unix(),
+		},
+	}
+	s.channel.Broadcast(resp)
 }

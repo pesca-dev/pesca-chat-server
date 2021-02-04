@@ -1,4 +1,4 @@
-package socket
+package events
 
 // BaseEvent .
 type BaseEvent struct {
@@ -29,12 +29,33 @@ type LoginResponsePayload struct {
 
 // MessageReceive .
 type MessageReceive struct {
-	Event   string `json:"event"`
-	Payload struct {
-		Message struct {
-			Content string `json:"content"`
-		} `json:"message"`
-	} `json:"payload"`
+	Event   string                `json:"event"`
+	Payload MessageReceivePayload `json:"payload"`
+}
+
+// MessageReceivePayload .
+type MessageReceivePayload struct {
+	Message struct {
+		Content string `json:"content"`
+	} `json:"message"`
+}
+
+// MessageResponsePayload .
+type MessageResponsePayload struct {
+	Author  MessageAuthor `json:"author"`
+	Message MessageObject `json:"message"`
+}
+
+// MessageAuthor .
+type MessageAuthor struct {
+	Username string `json:"username"`
+	ID       string `json:"id"`
+}
+
+// MessageObject .
+type MessageObject struct {
+	Content string `json:"content"`
+	Date    int64  `json:"date"`
 }
 
 // ErrorMessagePayload .

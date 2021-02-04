@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"git.pesca.dev/pesca-dev/pesca-chat-server/internal/channel"
 	"git.pesca.dev/pesca-dev/pesca-chat-server/internal/socket"
 	"github.com/gorilla/websocket"
 )
@@ -24,6 +25,8 @@ func (s *server) Start() {
 func makeCreateServer(addr string) func() *server {
 	var upgrader = websocket.Upgrader{}
 
+	channel := channel.CreateChannel()
+
 	handleRoot := func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)
 
@@ -33,7 +36,7 @@ func makeCreateServer(addr string) func() *server {
 			return
 		}
 
-		socket := socket.EnhanceSocket(c)
+		socket := socket.EnhanceSocket(c, &channel)
 		defer socket.Close(-1, "Socket closed manually")
 		socket.Start()
 	}
