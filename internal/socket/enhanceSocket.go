@@ -14,8 +14,9 @@ func EnhanceSocket(c *websocket.Conn) *PescaSocket {
 	id := uuid.NewString()
 
 	socket := &PescaSocket{
-		c:  c,
-		id: id,
+		c:        c,
+		id:       id,
+		handlers: make(map[string]func(m []byte)),
 	}
 	socket.Bind()
 	return socket

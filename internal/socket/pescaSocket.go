@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,6 +15,12 @@ type PescaSocket struct {
 	id string
 	// TODO lome: use slice
 	handlers map[string]func(m []byte)
+	user     userData
+}
+
+type userData struct {
+	username string
+	ID       string
 }
 
 // Send an event + payload message of the websocket.
@@ -115,7 +122,29 @@ func (s *PescaSocket) onLoginRequest(m []byte) {
 		})
 		return
 	}
-	// TODO lome: Handle login (maybe via s.login)
+	suc := s.login(req.Payload.Username, req.Payload.Password)
+	id := "-1"
+	if suc {
+		id = s.user.ID
+	}
+	s.Send("login:response", LoginResponsePayload{
+		Success: suc,
+		ID:      id,
+	})
+}
+
+// Try to login with given username and password.
+func (s *PescaSocket) login(username string, password string) bool {
+	s.user = userData{
+		username: username,
+		ID:       uuid.NewString(),
+	}
+	return true
+}
+
+// IsLoggedIn returns true if the current socket is logged in, false otherwise.
+func (s *PescaSocket) IsLoggedIn() bool {
+	return s.user.ID != ""
 }
 
 // Handle message event.
