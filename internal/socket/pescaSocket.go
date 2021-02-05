@@ -116,8 +116,7 @@ func (s *PescaSocket) on(event string, fn func(m []byte)) {
 // Emit a message on the socket.
 func (s *PescaSocket) emit(event string, m []byte) {
 	if s.handlers[event] != nil {
-		// TODO lome: goroutines?
-		s.handlers[event](m)
+		go s.handlers[event](m)
 	}
 }
 
