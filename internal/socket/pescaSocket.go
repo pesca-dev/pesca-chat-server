@@ -143,6 +143,7 @@ func (s *PescaSocket) onLoginRequest(m []byte) {
 
 // Try to login with given username and password.
 func (s *PescaSocket) login(username string, password string) bool {
+	// TODO lome: Use actual authentication
 	s.user = userData{
 		username: username,
 		ID:       uuid.NewString(),
