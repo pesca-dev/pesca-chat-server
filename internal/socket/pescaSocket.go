@@ -67,7 +67,7 @@ func (s *PescaSocket) Bind() {
 
 // Handle the on close event.
 func (s *PescaSocket) onClose(code int, text string) error {
-	// TODO lome: Add logic that needs to be executed upon closing of channel.
+	s.channel.Remove(s.id)
 	return nil
 }
 
