@@ -9,20 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// server is the general struct for containing the server.
-type server struct {
-	srv *http.Server
-}
-
-func (s *server) Start() {
-	err := s.srv.ListenAndServe()
-	if err != nil {
-		log.Fatalf("Error during listening: %v", err)
-	}
-}
-
 // makeCreateServer is a factory function for the createServer function.
-func makeCreateServer(addr string) func() *server {
+func makeCreateServer(addr string) func() *Server {
 	var upgrader = websocket.Upgrader{}
 
 	channel := channel.CreateChannel()
@@ -41,7 +29,7 @@ func makeCreateServer(addr string) func() *server {
 		socket.Start()
 	}
 
-	return func() *server {
+	return func() *Server {
 
 		mux := http.NewServeMux()
 		mux.HandleFunc("/", handleRoot)
@@ -51,7 +39,7 @@ func makeCreateServer(addr string) func() *server {
 			Handler: mux,
 		}
 
-		return &server{
+		return &Server{
 			srv,
 		}
 	}
