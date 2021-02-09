@@ -31,11 +31,6 @@ if [[ -n "${PESCA_DEV}" ]]; then
     XC_ARCH=$(go env GOARCH)
     # Allow LD_FLAGS to be appended during development compilations
     LD_FLAGS="-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY} $LD_FLAGS"
-elif [[ -n "{PESCA_PROD}" ]]; then 
-    # In production mode we only want to build for current arch
-    XC_OS=$(go env GOOS)
-    XC_ARCH=$(go env GOARCH) 
-    LD_FLAGS="-s -w"
 fi
 
 
