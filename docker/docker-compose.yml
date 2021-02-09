@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+    server:
+        build: ../
+        restart: always
+        ports:
+            - "10080:8080"
+        networks:
+            - pesca-chat-network
+
+networks:
+    pesca-chat-network:
+        name: pesca-chat-network

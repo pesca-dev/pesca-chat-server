@@ -49,7 +49,7 @@ gox \
     -arch="${XC_ARCH}" \
     -osarch="${XC_EXCLUDE_OSARCH}" \
     -ldflags "${LD_FLAGS}" \
-    -output "bin/{{.OS}}_{{.Arch}}/pesca-chat-server" \
+    -output "bin/pesca-chat-server" \
     ./cmd/pesca-chat-server
 
 # Move all the compiled things to the $GOPATH/bin
